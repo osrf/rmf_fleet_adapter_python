@@ -1,2 +1,5 @@
-
+*.eggs
 *.pyc
+tags
+*.swp
+*.swo
