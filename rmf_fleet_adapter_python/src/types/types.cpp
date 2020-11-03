@@ -20,7 +20,7 @@ rmf_task_msgs::msg::Delivery make_delivery_msg(
   std::string pickup_place_name,
   std::string pickup_dispenser,
   std::string dropoff_place_name,
-  std::string dropoff_dispenser)
+  std::string dropoff_ingestor)
 {
   rmf_task_msgs::msg::Delivery request;
   request.task_id = task_id;
@@ -29,7 +29,7 @@ rmf_task_msgs::msg::Delivery make_delivery_msg(
   request.pickup_dispenser = pickup_dispenser;
 
   request.dropoff_place_name = dropoff_place_name;
-  request.dropoff_dispenser = dropoff_dispenser;
+  request.dropoff_ingestor = dropoff_ingestor;
 
   return request;
 }
@@ -86,7 +86,7 @@ void bind_types(py::module &m) {
            py::arg("pickup_place_name") = "",
            py::arg("pickup_dispenser") = "",
            py::arg("dropoff_place_name") = "",
-           py::arg("dropoff_dispenser") = "")
+           py::arg("dropoff_ingestor") = "")
       .def_property("task_id",
                     [&](rmf_task_msgs::msg::Delivery& self){
                         return self.task_id;},
@@ -111,11 +111,11 @@ void bind_types(py::module &m) {
                     [&](rmf_task_msgs::msg::Delivery& self,
                        std::string dropoff_place_name){
                         self.dropoff_place_name = dropoff_place_name;})
-      .def_property("dropoff_dispenser",
+      .def_property("dropoff_ingestor",
                     [&](rmf_task_msgs::msg::Delivery& self){
-                        return self.dropoff_dispenser;},
+                        return self.dropoff_ingestor;},
                     [&](rmf_task_msgs::msg::Delivery& self,
-                       std::string dropoff_dispenser){
-                        self.dropoff_dispenser = dropoff_dispenser;});
+                       std::string dropoff_ingestor){
+                        self.dropoff_ingestor = dropoff_ingestor;});
                               // .def_property("pickup_place_name",
 }
