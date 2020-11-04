@@ -26,7 +26,7 @@ using OrientationConstraint = Graph::OrientationConstraint;
 void bind_graph(py::module &m) {
   auto m_graph = m.def_submodule("graph");
 
-  // WAYPOINT ==================================================================
+  //// WAYPOINT ==================================================================
   py::class_<Graph::Waypoint>(m_graph, "Waypoint")
       // TODO(CH3): Find a way to instantiate the templated constructor
       // Constructor must be explicitly instantiated
@@ -57,7 +57,7 @@ void bind_graph(py::module &m) {
       .def_property_readonly("index", &Graph::Waypoint::index)
       .def_property_readonly("waypoint_name", &Graph::Waypoint::name);
 
-  // ORIENTATION_CONSTRAINT ====================================================
+  //// ORIENTATION_CONSTRAINT ====================================================
   py::class_<OrientationConstraint,
              PyOrientationConstraint>(m_graph,
                                       "OrientationConstraint",
@@ -98,7 +98,7 @@ void bind_graph(py::module &m) {
   // It depends on types listed prior to this invocation
   bind_lane(m_graph);
 
-  // GRAPH =====================================================================
+  //// GRAPH =====================================================================
   py::class_<Graph>(m_graph, "Graph")
       .def(py::init<>())
 
@@ -166,7 +166,7 @@ void bind_graph(py::module &m) {
           &Graph::get_lane, py::const_))
       .def_property_readonly("num_lanes", &Graph::num_lanes);
 
-  // PARSE GRAPH ==============================================================
-  // Helper function to parse a graph from a yaml file
+  //// PARSE GRAPH ==============================================================
+  //// Helper function to parse a graph from a yaml file
   m_graph.def("parse_graph", &rmf_fleet_adapter::agv::parse_graph);
 }
