@@ -2,6 +2,8 @@
 #include <pybind11/operators.h>
 #include <pybind11/eigen.h>
 #include <pybind11/chrono.h>
+#include <pybind11/stl.h>
+#include <optional>
 
 #include <memory>
 #include <random>
@@ -49,37 +51,6 @@ void bind_types(py::module &m) {
     .def("discard", &std::mt19937::discard)
     .def("__call__", &std::mt19937::operator());
 
-  py::class_<rmf_utils::optional<std::size_t> >(m_type, "OptionalULong")
-      .def(py::init<std::size_t>())
-      .def_property_readonly("has_value",
-                             &rmf_utils::optional<std::size_t>::has_value)
-      .def_property_readonly("value", py::overload_cast<>(
-          &rmf_utils::optional<std::size_t>::value));
-
-  py::class_<rmf_utils::optional<double> >(m_type, "OptionalDouble")
-      .def(py::init<double>())
-      .def_property_readonly("has_value",
-                             &rmf_utils::optional<double>::has_value)
-      .def_property_readonly("value", py::overload_cast<>(
-          &rmf_utils::optional<double>::value));
-
-  py::class_<rmf_utils::optional<Eigen::Vector2d> >(m_type, "OptionalVector2D")
-      .def(py::init<Eigen::Vector2d>())
-      .def_property_readonly("has_value",
-                             &rmf_utils::optional<Eigen::Vector2d>::has_value)
-      .def_property_readonly("value", py::overload_cast<>(
-          &rmf_utils::optional<Eigen::Vector2d>::value));
-
-  py::class_<rmf_utils::optional<Duration> >(m_type, "OptionalDuration")
-      .def(py::init<Duration>())
-      .def_property_readonly("has_value",
-                             &rmf_utils::optional<Duration>::has_value)
-      .def_property_readonly("value", py::overload_cast<>(
-          &rmf_utils::optional<Duration>::value));
-
-  py::class_<rmf_utils::nullopt_t>(m_type, "NullOptional")
-      .def(py::init<>());
-
   py::class_<rmf_task_msgs::msg::Delivery>(m_type, "CPPDeliveryMsg")
       .def(py::init(&make_delivery_msg),
            py::arg("task_id") = "",
@@ -117,5 +88,4 @@ void bind_types(py::module &m) {
                     [&](rmf_task_msgs::msg::Delivery& self,
                        std::string dropoff_ingestor){
                         self.dropoff_ingestor = dropoff_ingestor;});
-                              // .def_property("pickup_place_name",
 }

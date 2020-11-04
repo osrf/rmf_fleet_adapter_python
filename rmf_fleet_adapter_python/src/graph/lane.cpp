@@ -76,13 +76,13 @@ void bind_lane(py::module &m) {
           py::overload_cast<>(&Lane::LiftSession::duration, py::const_),
           py::overload_cast<Duration>(&Lane::LiftSession::duration));
 
-  py::class_<Lane::LiftSessionEnd, Lane::LiftSession>(m_lane, "LiftSessionBegin")
+  py::class_<Lane::LiftSessionBegin, Lane::LiftSession>(m_lane, "LiftSessionBegin")
       .def(py::init<std::string, std::string, Duration>(),
            py::arg("lift_name"),
            py::arg("floor_name"),
            py::arg("duration"));
 
-  py::class_<Lane::LiftDoorOpen, Lane::LiftSession>(m_lane, "LiftMove")
+  py::class_<Lane::LiftMove, Lane::LiftSession>(m_lane, "LiftMove")
       .def(py::init<std::string, std::string, Duration>(),
            py::arg("lift_name"),
            py::arg("floor_name"),
