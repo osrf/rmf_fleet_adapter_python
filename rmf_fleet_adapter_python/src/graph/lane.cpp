@@ -113,6 +113,14 @@ void bind_lane(py::module &m) {
                     py::overload_cast<>(&Lane::Dock::duration, py::const_),
                     py::overload_cast<Duration>(&Lane::Dock::duration));
 
+  // WAIT ======================================================================
+  py::class_<Lane::Wait>(m_lane, "Wait")
+      .def(py::init<Duration>(),
+           py::arg("duration"))
+      .def_property("duration",
+                    py::overload_cast<>(&Lane::Wait::duration, py::const_),
+                    py::overload_cast<Duration>(&Lane::Wait::duration));
+
   // EXECUTOR ==================================================================
   py::class_<Lane::Executor, PyExecutor>(m_lane, "Executor", py::dynamic_attr())
       .def(py::init<>())
