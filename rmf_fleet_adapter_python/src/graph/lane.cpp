@@ -20,10 +20,10 @@ void bind_lane(py::module &m) {
 
   // LANE ==================================================================
   py::class_<Lane>(m_lane, "Lane")
-       //TODO(CH3): Find a way to instantiate the templated constructor
-       //Constructor must be explicitly instantiated
-       //Somehow this still results in an incomplete type...
-       //.def_static(py::init(&Lane::Implementation::make<std::size_t,
+      // TODO(CH3): Find a way to instantiate the templated constructor
+      // Constructor must be explicitly instantiated
+      // Somehow this still results in an incomplete type...
+      // .def_static(py::init(&Lane::Implementation::make<std::size_t,
                                                             //Lane::Node,
                                                             //Lane::Node,
                                                             //bool,
@@ -144,7 +144,7 @@ void bind_lane(py::module &m) {
       .def("wait_execute",
            py::overload_cast<const Lane::Wait&>(&Lane::Executor::execute));
 
-  //// EVENT =====================================================================
+  // EVENT =====================================================================
   py::class_<Lane::Event, PyEvent>(m_lane, "Event", py::dynamic_attr())
       .def(py::init<>())
       .def("duration", &Lane::Event::duration)
@@ -176,7 +176,7 @@ void bind_lane(py::module &m) {
   py::class_<rmf_utils::clone_ptr<Lane::Event> >(m_lane, "EventPtr")
       .def(py::init<>());
 
-  //// NODE ======================================================================
+  // NODE ======================================================================
   py::class_<Lane::Node>(m_lane, "Node", py::dynamic_attr())
       .def(py::init<std::size_t,
                     rmf_utils::clone_ptr<Lane::Event>,
