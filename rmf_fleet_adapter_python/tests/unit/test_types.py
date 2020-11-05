@@ -5,9 +5,6 @@ import datetime
 
 # TYPES ======================================================================
 def test_types():
-    # Test nullopt
-    # assert types.NullOptional()
-
     # Test CPPDeliveryMsg
     msg = types.CPPDeliveryMsg("task",
                                "pickup_place",
@@ -31,15 +28,3 @@ def test_types():
     assert msg.pickup_dispenser == "pickup_dispenser_rawr"
     assert msg.dropoff_place_name == "dropoff_place_rawr"
     assert msg.dropoff_ingestor == "dropoff_ingestor_rawr"
-
-    # Test optionals
-    # assert types.OptionalULong(1).value == 1
-
-    # assert types.OptionalDouble(1).value == 1
-    # assert types.OptionalDouble(1.0).value == 1
-
-    # assert np.ndarray.all(
-        # types.OptionalVector2D([1, 2]).value == np.array([1, 2])
-    # )
-
-    # assert types.OptionalDuration(datetime.timedelta(seconds=60))
