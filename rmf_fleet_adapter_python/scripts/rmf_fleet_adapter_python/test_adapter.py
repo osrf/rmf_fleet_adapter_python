@@ -283,7 +283,7 @@ class MockRobotCommand(adpt.RobotCommandHandle):
                         path_finished_callback):
         print("\n[RobotCommandHandle] Setting new path of %d waypoints..."
               % len(waypoints))
-        print("Waypoints:", [x.graph_index.value for x in waypoints])
+        print("Waypoints:", [x.graph_index for x in waypoints])
 
         self.stop()
 
@@ -333,17 +333,17 @@ class MockRobotCommand(adpt.RobotCommandHandle):
             # This waypoint is a plan waypoint, NOT graph waypoint!!
             previous_waypoint = waypoints[self.current_waypoint_target - 1]
 
-            if previous_waypoint.graph_index.has_value:
+            if previous_waypoint.graph_index:
                 print("[RobotUpdateHandle] UPDATING ROBOT POSITION:",
-                      previous_waypoint.graph_index.value)
+                      previous_waypoint.graph_index)
 
                 self.updater.update_position(
-                    previous_waypoint.graph_index.value,
+                    previous_waypoint.graph_index,
                     previous_waypoint.position[2]
                 )
-                self.visited_waypoints[previous_waypoint.graph_index.value] = (
+                self.visited_waypoints[previous_waypoint.graph_index] = (
                     self.visited_waypoints
-                        .get(previous_waypoint.graph_index.value, 0)
+                        .get(previous_waypoint.graph_index, 0)
                     + 1
                 )
             else:
