@@ -1,4 +1,5 @@
 import rmf_dispenser_msgs.msg as dispenser_msgs
+import rmf_ingestor_msgs.msg as ingestor_msgs
 from rmf_task_msgs.msg import TaskSummary
 
 import rclpy
@@ -11,9 +12,11 @@ import rmf_adapter.geometry as geometry
 import rmf_adapter.graph as graph
 import rmf_adapter.plan as plan
 
-from functools import partial
 import datetime
 import time
+from functools import partial
+
+from collections import namedtuple
 
 ###############################################################################
 # PARAMS
@@ -22,12 +25,20 @@ import time
 pickup_name = "pickup"
 dropoff_name = "dropoff"
 
-quiet_dispenser_name = "quiet"
-flaky_dispenser_name = "flaky"
+dispenser_name = "mock_dispenser"
+ingestor_name = "mock_ingestor"
 
 ###############################################################################
 # CONSTS
 ###############################################################################
+
+INGESTOR_RESULT_ACKNOWLEDGED = 0
+INGESTOR_RESULT_SUCCESS = 1
+INGESTOR_RESULT_FAILED = 2
+
+INGESTOR_STATE_IDLE = 0
+INGESTOR_STATE_BUSY = 1
+INGESTOR_STATE_OFFLINE = 2
 
 DISPENSER_RESULT_ACKNOWLEDGED = 0
 DISPENSER_RESULT_SUCCESS = 1
@@ -47,19 +58,32 @@ TASK_STATE_FAILED = 3
 # CLASSES
 ###############################################################################
 
-class MockQuietDispenser(Node):
-    """
-    This mock dispenser will not publish any states; it will only publish a
-    successful result and nothing else.
+# using these data structures for better readability
+# request_guid in this case is that of the requester
+DispenserTask = namedtuple("DispenserTask", "request_guid receive_time")
+IngestorTask = namedtuple("IngestorTask", "request_guid receive_time")
 
-    Note: This dispenser is just using pure rclpy, there is no usage of
-    rmf_adapter here
-    """
-    def __init__(self, name):
+
+class MockDispenser(Node):
+    # Data structure to represent a DispenserTask
+    def __init__(self, name, dispense_duration_sec=1.0,
+                 publish_states=True, publish_results=True):
         super().__init__(name)
 
         # Variables
         self.reset(name)
+        self.dispense_duration_sec = float(dispense_duration_sec)
+        self.publish_states = publish_states
+        self.publish_results = publish_results
+
+        self.current_request_idx = 0  # Points to current task
+        self.tasks = []  # Ordered Tasks by time of receipt
+
+        # Currently only one task can be processed at a time
+        self.timer = self.create_timer(
+            0.1,
+            self._timer_cb
+        )
 
         # Pub-sub
         self.result_pub = self.create_publisher(
@@ -67,94 +91,6 @@ class MockQuietDispenser(Node):
             'dispenser_results',
             1
         )
-        self.request_sub = self.create_subscription(
-            dispenser_msgs.DispenserRequest,
-            'dispenser_requests',
-            self._process_request_cb,
-            1
-        )
-
-    def reset(self, name=None):
-        if name is not None:
-            self.name = name
-
-        self.tasks = {}
-        self.success_flag = False
-
-        try:
-            self.timer.reset()
-            self.timer.cancel()
-        except Exception:
-            pass
-
-        self.timer = None
-
-    def _process_request_cb(self, msg):
-        # Process request if addressed to this dispenser
-        if msg.target_guid != self.name:
-            return
-
-        print("[MockQuietDispenser] REQUEST RECEIVED")
-        if self.tasks.get(msg.request_guid):
-            print("QUIET DISPENSER SUCCESS")
-            status = DISPENSER_RESULT_SUCCESS
-        else:
-            self.tasks[msg.request_guid] = False
-            status = DISPENSER_RESULT_ACKNOWLEDGED
-
-            self.timer = self.create_timer(
-                0.01,
-                partial(self._timer_cb, msg=msg)
-            )
-
-        result = dispenser_msgs.DispenserResult()
-        result.time = self.get_clock().now().to_msg()
-        result.status = status
-        result.source_guid = self.name
-        result.request_guid = msg.request_guid
-
-        self.result_pub.publish(result)
-
-    def _timer_cb(self, msg):
-        if not self.timer:
-            return
-
-        result = dispenser_msgs.DispenserResult()
-        result.time = self.get_clock().now().to_msg()
-        result.status = DISPENSER_RESULT_SUCCESS
-        result.source_guid = self.name
-        result.request_guid = msg.request_guid
-
-        self.result_pub.publish(result)
-        self.success_flag = True
-        self.timer.cancel()
-
-
-class MockFlakyDispenser(Node):
-    """
-    This mock dispenser will not publish any results; it will only publish
-    states. This is representative of network issues where a result might not
-    actually arrive, but the state heartbeats can still get through.
-
-    Note: This dispenser is just using pure rclpy, there is no usage of
-    rmf_adapter here
-    """
-    class RequestEntry():
-        def __init__(self, request, publish_count):
-            self.request = request
-            self.publish_count = publish_count
-
-    def __init__(self, name):
-        super().__init__(name)
-
-        # Variables
-        self.name = name
-        self.request_queue = []
-
-        self.success_flag = False
-        self._fulfilled_flag = False
-
-        # Pub-sub
         self.state_pub = self.create_publisher(
             dispenser_msgs.DispenserState,
             'dispenser_states',
@@ -167,58 +103,178 @@ class MockFlakyDispenser(Node):
             1
         )
 
-        self._timer = self.create_timer(
+    def reset(self, name=None):
+        # reset sets a new name if provided
+        if name is not None:
+            self.name = name
+
+        self.tasks = []
+
+    def _process_request_cb(self, msg):
+        # Process request only if addressed to this dispenser
+        if msg.target_guid != self.name:
+            return
+
+        task_already_received = [
+            x for x in self.tasks if x.request_guid == msg.request_guid]
+
+        if task_already_received:
+            # print("[MockDispenser] DUPLICATE REQUEST")
+            pass
+        else:
+            # New request to process
+            print("[MockDispenser] NEW REQUEST RECEIVED")
+            new_task = DispenserTask(
+                request_guid=msg.request_guid,
+                receive_time=self.get_clock().now().to_msg())
+            self.tasks.append(new_task)
+
+    def _timer_cb(self):
+        # Report Dispenser State
+        if self.publish_states:
+            state = dispenser_msgs.DispenserState()
+            state.time = self.get_clock().now().to_msg()
+            state.guid = self.name
+            if self.tasks:
+                state.request_guid_queue = [
+                    x.request_guid for x in self.tasks][
+                        self.current_request_idx:]
+            if state.request_guid_queue:
+                state.mode = DISPENSER_STATE_BUSY
+            else:
+                state.mode = DISPENSER_STATE_IDLE
+            state.seconds_remaining = self.dispense_duration_sec
+            self.state_pub.publish(state)
+
+        if self.tasks:
+            if self.current_request_idx >= len(self.tasks):
+                # No more new tasks, do nothing
+                return
+        else:
+            # Tasks is empty, return
+            return
+
+        # If enough time has elapsed, consider dispensing done
+        time_now = self.get_clock().now().to_msg().sec
+        time_elapsed = time_now - self.tasks[
+            self.current_request_idx].receive_time.sec
+        if time_elapsed > self.dispense_duration_sec:
+            if self.publish_results:
+                # Send a success message
+                result = dispenser_msgs.DispenserResult()
+                result.time = self.get_clock().now().to_msg()
+                result.status = DISPENSER_RESULT_SUCCESS
+                result.source_guid = self.name
+                result.request_guid = self.tasks[
+                    self.current_request_idx].request_guid
+                self.result_pub.publish(result)
+            self.current_request_idx += 1
+
+
+class MockIngestor(Node):
+    def __init__(self, name, ingest_duration_sec=1,
+                 publish_states=True, publish_results=True):
+        super().__init__(name)
+
+        # Variables
+        self.reset(name)
+        self.ingest_duration_sec = float(ingest_duration_sec)
+        self.publish_states = publish_states
+        self.publish_results = publish_results
+
+        self.current_request_idx = 0  # Points to current task
+        self.tasks = []  # Ordered Tasks by time of receipt
+
+        # Currently only one task can be processed at a time
+        self.timer = self.create_timer(
             0.1,
             self._timer_cb
         )
 
+        # Pub-sub
+        self.result_pub = self.create_publisher(
+            ingestor_msgs.IngestorResult,
+            'ingestor_results',
+            1
+        )
+        self.state_pub = self.create_publisher(
+            ingestor_msgs.IngestorState,
+            'ingestor_states',
+            1
+        )
+        self.request_sub = self.create_subscription(
+            ingestor_msgs.IngestorRequest,
+            'ingestor_requests',
+            self._process_request_cb,
+            1
+        )
+
     def reset(self, name=None):
+        # reset sets a new name if provided
         if name is not None:
             self.name = name
 
-        self.request_queue = []
-
-        self.success_flag = False
-        self._fulfilled_flag = False
+        self.tasks = []
 
     def _process_request_cb(self, msg):
-        # Add requests to queue if addressed to this dispenser
+        # Process request only if addressed to this Ingestor
         if msg.target_guid != self.name:
             return
 
-        print("[MockFlakyDispenser] REQUEST RECEIVED")
-        self.request_queue.append(self.RequestEntry(msg, 0))
+        task_already_received = [
+            x for x in self.tasks if x.request_guid == msg.request_guid]
+
+        if task_already_received:
+            # print("[MockIngestor] DUPLICATE REQUEST")
+            pass
+        else:
+            # New request to process
+            print("[MockIngestor] NEW REQUEST RECEIVED")
+            new_task = IngestorTask(
+                request_guid=msg.request_guid,
+                receive_time=self.get_clock().now().to_msg())
+            self.tasks.append(new_task)
 
     def _timer_cb(self):
-        msg = dispenser_msgs.DispenserState()
-        msg.guid = self.name
+        # Report Ingestor State
+        if self.publish_states:
+            state = ingestor_msgs.IngestorState()
+            state.time = self.get_clock().now().to_msg()
+            state.guid = self.name
+            if self.tasks:
+                state.request_guid_queue = [
+                    x.request_guid for x in self.tasks][
+                        self.current_request_idx:]
+            if state.request_guid_queue:
+                state.mode = INGESTOR_STATE_BUSY
+            else:
+                state.mode = INGESTOR_STATE_IDLE
+            state.seconds_remaining = self.ingest_duration_sec
+            self.state_pub.publish(state)
 
-        if not self.request_queue:  # If empty
-            msg.mode = DISPENSER_STATE_IDLE
+        if self.tasks:
+            if self.current_request_idx >= len(self.tasks):
+                # No more new tasks, do nothing
+                return
         else:
-            msg.mode = DISPENSER_STATE_BUSY
+            # Tasks is empty, return
+            return
 
-        msg.time = self.get_clock().now().to_msg()
-        msg.seconds_remaining = 0.1
-
-        # Increment publish_count of all requests in queue
-        for req in self.request_queue:
-            msg.request_guid_queue.append(req.request.request_guid)
-            req.publish_count += 1
-
-        initial_count = len(self.request_queue)
-
-        # Remove all requests with publish count > 2
-        self.request_queue = list(filter(lambda x: x.publish_count > 2,
-                                  self.request_queue))
-
-        # If any requests were removed, set flags to True
-        if len(self.request_queue) < initial_count:
-            if not self._fulfilled_flag:
-                self._fulfilled_flag = True
-                self.success_flag = True
-
-        self.state_pub.publish(msg)
+        # If enough time has elapsed, consider ingesting done
+        time_now = self.get_clock().now().to_msg().sec
+        time_elapsed = time_now - self.tasks[
+            self.current_request_idx].receive_time.sec
+        if time_elapsed > self.ingest_duration_sec:
+            if self.publish_results:
+                # Send a success message
+                result = ingestor_msgs.IngestorResult()
+                result.time = self.get_clock().now().to_msg()
+                result.status = INGESTOR_RESULT_SUCCESS
+                result.source_guid = self.name
+                result.request_guid = self.tasks[
+                    self.current_request_idx].request_guid
+                self.result_pub.publish(result)
+            self.current_request_idx += 1
 
 
 class MockRobotCommand(adpt.RobotCommandHandle):
@@ -381,6 +437,43 @@ class MockRobotCommand(adpt.RobotCommandHandle):
             print("[RobotCommandHandle] PATH FINISHED")
 
 
+class TaskSummaryObserver(Node):
+    def __init__(self):
+        super().__init__('task_observer')
+        # Maps task_ids to True/False Completions
+        self.tasks_status = {}
+
+        # Pub-sub
+        self.request_sub = self.create_subscription(
+            TaskSummary,
+            'task_summaries',
+            self._process_task_summary_cb,
+            1
+        )
+
+    def all_tasks_complete(self):
+        return all(list(self.tasks_status.values()))
+ 
+    def add_task(self, task_name):
+        self.tasks_status[task_name] = False
+
+    def count_successful_tasks(self):
+        successful = 0
+        statuses = self.tasks_status.values()
+        for status_complete in statuses:
+            if status_complete:
+                successful += 1
+        return (successful, len(statuses))
+
+    def _process_task_summary_cb(self, msg):
+        task_name = msg.task_id
+        if task_name not in self.tasks_status.keys():
+            print('Observed Unaccounted Task. This should not happen')
+            return
+        if msg.state == TASK_STATE_COMPLETED:
+            self.tasks_status[task_name] = True
+
+
 def main():
     # INIT RCL ================================================================
     rclpy.init()
@@ -405,22 +498,24 @@ def main():
     assert test_graph.get_waypoint(2).holding_point
     assert test_graph.get_waypoint(9).holding_point
     assert not test_graph.get_waypoint(10).holding_point
-
-    """
-                     10(D)
-                      |
-                      |
-                      8------9
-                      |      |
-                      |      |
-        3------4------5------6------7(D)
-                      |      |
-                      |      |
-                      1------2
-                      |
-                      |
-                      0
-   """
+    
+    test_graph_vis = \
+        """
+                         10(D)
+                          |
+                          |
+                          8------9
+                          |      |
+                          |      |
+            3------4------5------6------7(D)
+                          |      |
+                          |      |
+                          1------2
+                          |
+                          |
+                          0
+       """
+    print(test_graph_vis)
 
     test_graph.add_bidir_lane(0, 1)  # 0   1
     test_graph.add_bidir_lane(1, 2)  # 2   3
@@ -482,132 +577,72 @@ def main():
                     starts,
                     partial(updater_inserter, robot_cmd))
 
-    # INIT TASK OBSERVER ======================================================
-    at_least_one_incomplete = False
-    completed = False
-
-    def task_cb(msg):
-        nonlocal at_least_one_incomplete
-        nonlocal completed
-
-        if msg.state == TASK_STATE_COMPLETED:
-            completed = True
-            at_least_one_incomplete = False
-        else:
-            completed = False
-            at_least_one_incomplete = True
-
-    task_node = rclpy.create_node("task_summary_node")
-    task_node.create_subscription(TaskSummary,
-                                  "task_summaries",
-                                  task_cb,
-                                  10)
-
     # INIT DISPENSERS =========================================================
-    quiet_dispenser = MockQuietDispenser(quiet_dispenser_name)
-    flaky_dispenser = MockFlakyDispenser(flaky_dispenser_name)
+    dispenser = MockDispenser(dispenser_name)
+    ingestor = MockIngestor(ingestor_name)
+
+    # INIT TASK SUMMARY OBSERVER ==============================================
+    observer = TaskSummaryObserver()
 
     # FINAL PREP ==============================================================
     rclpy_executor = SingleThreadedExecutor()
-    rclpy_executor.add_node(task_node)
     rclpy_executor.add_node(cmd_node)
-    rclpy_executor.add_node(quiet_dispenser)
-    rclpy_executor.add_node(flaky_dispenser)
-
-    last_quiet_state = False
-    last_flaky_state = False
+    rclpy_executor.add_node(dispenser)
+    rclpy_executor.add_node(ingestor)
+    rclpy_executor.add_node(observer)
 
     # GO! =====================================================================
     adapter.start()
 
     print("# SENDING NEW REQUEST ############################################")
-    request = adpt.type.CPPDeliveryMsg("test_delivery",
+    test_name = 'test_delivery'
+    request = adpt.type.CPPDeliveryMsg(test_name,
                                        pickup_name,
-                                       quiet_dispenser_name,
+                                       dispenser_name,
                                        dropoff_name,
-                                       flaky_dispenser_name)
-    quiet_dispenser.reset()
-    flaky_dispenser.reset()
+                                       ingestor_name)
+    dispenser.reset()
+    ingestor.reset()
+    observer.add_task(test_name)
     adapter.request_delivery(request)
     rclpy_executor.spin_once(1)
 
     for i in range(1000):
-        if quiet_dispenser.success_flag != last_quiet_state:
-            last_quiet_state = quiet_dispenser.success_flag
-            print("== QUIET DISPENSER FLIPPED SUCCESS STATE ==",
-                  last_quiet_state)
-
-        if flaky_dispenser.success_flag != last_flaky_state:
-            last_flaky_state = flaky_dispenser.success_flag
-            print("== FLAKY DISPENSER FLIPPED SUCCESS STATE ==",
-                  last_flaky_state)
-
-        if quiet_dispenser.success_flag and flaky_dispenser.success_flag:
-            rclpy_executor.spin_once(1)
+        if observer.all_tasks_complete():
+            print("All Tasks Complete.")
             break
-
         rclpy_executor.spin_once(1)
-        time.sleep(0.2)
+        # time.sleep(0.2)
 
+    results = observer.count_successful_tasks()
     print("\n== DEBUG TASK REPORT ==")
     print("Visited waypoints:", robot_cmd.visited_waypoints)
-    print("At least one incomplete:", at_least_one_incomplete)
-    print("Completed:", completed)
-    print()
+    print(f"Sucessful Tasks: {results[0]} / {results[1]}")
 
-    assert len(robot_cmd.visited_waypoints) == 6
-    assert all([x in robot_cmd.visited_waypoints for x in [0, 5, 6, 7, 8, 10]])
-    assert robot_cmd.visited_waypoints[0] == 2
+    assert results[0] == results[1]  # All tasks complete
+
+    # Robot planned paths take the shortest path
+    assert all([x in robot_cmd.visited_waypoints for x in [5, 6, 7, 8, 10]])
     assert robot_cmd.visited_waypoints[5] == 4
     assert robot_cmd.visited_waypoints[6] == 3
     assert robot_cmd.visited_waypoints[7] == 1
     assert robot_cmd.visited_waypoints[8] == 2
     assert robot_cmd.visited_waypoints[10] == 1
-    assert at_least_one_incomplete
 
-    # Uncomment this to send a second request.
+    # Old assertions
+    # assert all([x in robot_cmd.visited_waypoints for x in [0, 5, 6, 7, 8, 10]])
+    # assert len(robot_cmd.visited_waypoints) == 6
+    # assert robot_cmd.visited_waypoints[0] == 2
+    # assert robot_cmd.visited_waypoints[5] == 4
+    # assert robot_cmd.visited_waypoints[6] == 3
+    # assert robot_cmd.visited_waypoints[7] == 1
+    # assert robot_cmd.visited_waypoints[8] == 2
+    # assert robot_cmd.visited_waypoints[10] == 1
 
-    # TODO(CH3):
-    # But note! The TaskManager has to be fixed first to allow task pre-emption
-    # print("# SENDING NEW REQUEST ##########################################")
-    # request = adpt.type.CPPDeliveryMsg("test_delivery_two",
-    #                                    dropoff_name,
-    #                                    flaky_dispenser_name,
-    #                                    pickup_name,
-    #                                    quiet_dispenser_name)
-    # quiet_dispenser.reset()
-    # flaky_dispenser.reset()
-    # adapter.request_delivery(request)
-    # rclpy_executor.spin_once(1)
-    #
-    # for i in range(1000):
-    #     if quiet_dispenser.success_flag != last_quiet_state:
-    #         last_quiet_state = quiet_dispenser.success_flag
-    #         print("== QUIET DISPENSER FLIPPED SUCCESS STATE ==",
-    #               last_quiet_state)
-    #
-    #     if flaky_dispenser.success_flag != last_flaky_state:
-    #         last_flaky_state = flaky_dispenser.success_flag
-    #         print("== FLAKY DISPENSER FLIPPED SUCCESS STATE ==",
-    #               last_flaky_state)
-    #
-    #     if quiet_dispenser.success_flag and flaky_dispenser.success_flag:
-    #         rclpy_executor.spin_once(1)
-    #         break
-    #
-    #     rclpy_executor.spin_once(1)
-    #     time.sleep(0.2)
-    #
-    # print("\n== DEBUG TASK REPORT ==")
-    # print("Visited waypoints:", robot_cmd.visited_waypoints)
-    # print("At least one incomplete:", at_least_one_incomplete)
-    # print("Completed:", completed)
-    # print()
-
-    task_node.destroy_node()
     cmd_node.destroy_node()
-    quiet_dispenser.destroy_node()
-    flaky_dispenser.destroy_node()
+    observer.destroy_node()
+    dispenser.destroy_node()
+    ingestor.destroy_node()
 
     rclpy_executor.shutdown()
     rclpy.shutdown()
