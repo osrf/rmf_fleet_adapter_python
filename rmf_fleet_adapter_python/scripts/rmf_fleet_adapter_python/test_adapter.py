@@ -596,9 +596,10 @@ def main():
     print("Visited waypoints:", robot_cmd.visited_waypoints)
     print(f"Sucessful Tasks: {results[0]} / {results[1]}")
 
-    assert results[0] == results[1]  # All tasks complete
+    print("\n== CHECK ALL TASKS COMPLETE ==")
+    assert results[0] == results[1]  
 
-    # Robot planned paths take the shortest path
+    print("\n== CHECK ROBOT TOOK EXPECTED PATH ==")
     assert all([x in robot_cmd.visited_waypoints for x in [5, 6, 7, 8, 10]])
     assert robot_cmd.visited_waypoints[5] == 4
     assert robot_cmd.visited_waypoints[6] == 3
