@@ -291,7 +291,6 @@ class MockRobotCommand(adpt.RobotCommandHandle):
         self.active = False
         self.timer = None
         self.current_waypoint_target = 0
-        self.dockings = {}
         self.visited_waypoints = []
         self.dock_to_wp = {}
 
