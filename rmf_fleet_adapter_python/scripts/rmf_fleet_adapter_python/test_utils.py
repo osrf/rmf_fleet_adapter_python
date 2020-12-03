@@ -21,6 +21,8 @@ class Constants:
     ingestor_states_topic = 'ingestor_states'
     ingestor_requests_topic = 'ingestor_requests'
 
+    task_summary_topic = 'task_summaries'
+
 
 class MockDispenser(Node):
     def __init__(self, name, dispense_duration_sec=1.0,
@@ -245,7 +247,7 @@ class MockRobotCommand(adpt.RobotCommandHandle):
 
         def dock_execute(self, dock):
             self.dock_to_wp[dock.dock_name] = self.wp
-            print("DOCK EVENT EXECUTED FOR DOCK:", dock.dock_name)
+            # print("DOCK EVENT EXECUTED FOR DOCK:", dock.dock_name)
 
         # And these are all overrided but meant to do nothing
         def door_open_execute(self, door_open):
@@ -266,15 +268,8 @@ class MockRobotCommand(adpt.RobotCommandHandle):
     def __init__(self, node, graph):
         adpt.RobotCommandHandle.__init__(self)
 
-        self.updater = None
-
-        self.active = False
         self.node = node
-        self.timer = None
-        self.current_waypoint_target = 0
-        self.dockings = {}
-        self.visited_waypoints = {}
-        self.dock_to_wp = {}
+        self.reset()
 
         for i in range(graph.num_lanes):
             lane = graph.get_lane(i)
@@ -289,7 +284,16 @@ class MockRobotCommand(adpt.RobotCommandHandle):
                     print(type(lane.entry.event))
                     print("EVENT EXECUTE FOR LANE", i, "NOT IMPLEMENTED")
 
-        print("Registered Docks:", self.dock_to_wp, "\n")
+        # print("Registered Docks:", self.dock_to_wp, "\n")
+
+    def reset(self):
+        self.updater = None
+        self.active = False
+        self.timer = None
+        self.current_waypoint_target = 0
+        self.dockings = {}
+        self.visited_waypoints = []
+        self.dock_to_wp = {}
 
     def follow_new_path(self,
                         waypoints,
@@ -322,13 +326,8 @@ class MockRobotCommand(adpt.RobotCommandHandle):
     def dock(self, dock_name, docking_finished_callback):
         assert dock_name in self.dock_to_wp
 
-        # For both dockings and visited waypoints, increment the associated
-        # keyed values by 1. Or start it off at 1 if it doesn't exist yet.
-        self.dockings[dock_name] = self.dockings.get(dock_name, 0) + 1
-
         waypoint = self.dock_to_wp[dock_name]
-        self.visited_waypoints[waypoint] = (
-            self.visited_waypoints.get(waypoint, 0) + 1)
+        self.visited_waypoints.append(waypoint)
 
         docking_finished_callback()
         print("[RobotCommandHandle] DOCKING FINISHED")
@@ -344,28 +343,25 @@ class MockRobotCommand(adpt.RobotCommandHandle):
             self.current_waypoint_target += 1
 
         if self.updater:
-            # This waypoint is a plan waypoint, NOT graph waypoint!!
             previous_waypoint = waypoints[self.current_waypoint_target - 1]
 
-            if previous_waypoint.graph_index:
-                print("[RobotUpdateHandle] UPDATING ROBOT POSITION:",
-                      previous_waypoint.graph_index)
+            previous_waypoint_graph_idx = previous_waypoint.graph_index
+            print("[RobotUpdateHandle] UPDATING ROBOT POSITION:", 
+                  previous_waypoint_graph_idx)
 
-                self.updater.update_position(
-                    previous_waypoint.graph_index,
-                    previous_waypoint.position[2]
-                )
-                self.visited_waypoints[previous_waypoint.graph_index] = (
-                    self.visited_waypoints
-                        .get(previous_waypoint.graph_index, 0) + 1
-                )
+            self.updater.update_position(
+                previous_waypoint_graph_idx,
+                previous_waypoint.position[2]
+            )
 
-            else:
-                print("[RobotUpdateHandle] UPDATING ROBOT POSITION DEFAULT:",
-                      previous_waypoint.position)
-                # TODO(CH3): NOTE(CH3): Confirm this magic string is wanted
-                self.updater.update_position("test_map",
-                                             previous_waypoint.position)
+            self.visited_waypoints.append(previous_waypoint_graph_idx)
+
+        else:
+            print("[RobotUpdateHandle] UPDATING ROBOT POSITION DEFAULT:",
+                  previous_waypoint.position)
+            # TODO(CH3): NOTE(CH3): Confirm this magic string is wanted
+            self.updater.update_position("test_map",
+                                         previous_waypoint.position)
 
         if self.current_waypoint_target < len(waypoints):
             # Again, this waypoint is a plan waypoint! NOT a graph waypoint!!
@@ -404,7 +400,7 @@ class TaskSummaryObserver(Node):
         # Pub-sub
         self.request_sub = self.create_subscription(
             TaskSummary,
-            'task_summaries',
+            Constants.task_summary_topic,
             self._process_task_summary_cb,
             1
         )

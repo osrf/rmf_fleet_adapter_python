@@ -15,10 +15,6 @@ from rmf_fleet_adapter_python.test_utils import TaskSummaryObserver
 from functools import partial
 
 
-###############################################################################
-# TEST HELPER CLASSES
-###############################################################################
-
 test_name = 'test_loop'
 map_name = "test_map"
 fleet_name = "test_fleet"
@@ -62,6 +58,7 @@ def main():
         D : Dispenser
         I : Ingestor
         H : Holding Point
+        K : Dock
         Numerals : Waypoints
         ---- : Lanes
         """
@@ -69,13 +66,13 @@ def main():
     test_graph_vis = \
         test_graph_legend + \
         """
-                         10(I)
+                         10(I,K)
                           |
                           |
                           8------9(H)
                           |      |
                           |      |
-            3------4------5------6------7(D)
+            3------4------5------6------7(D,K)
                           |      |
                           |      |
                           1------2(H)
@@ -83,7 +80,6 @@ def main():
                           |
                           0
        """
-    print(test_graph_vis)
 
     test_graph.add_bidir_lane(0, 1)  # 0   1
     test_graph.add_bidir_lane(1, 2)  # 2   3
@@ -155,7 +151,10 @@ def main():
 
     # GO! =====================================================================
     adapter.start()
-    print("# SENDING NEW LOOP REQUEST #######################################")
+
+    print("\n")
+    print("# SENDING SINGLE LOOP REQUEST ####################################")
+    print(test_graph_vis)
     request = adpt.type.CPPLoopMsg(test_name,
                                    fleet_name,
                                    loop_count,
@@ -167,7 +166,7 @@ def main():
 
     for i in range(1000):
         if observer.all_tasks_complete():
-            print("Loop Task Complete.")
+            print("Tasks Complete.")
             break
         rclpy_executor.spin_once(1)
         # time.sleep(0.2)
@@ -178,9 +177,13 @@ def main():
     print(f"Sucessful Tasks: {results[0]} / {results[1]}")
 
     assert results[0] == results[1], "Not all tasks were completed."
+
     error_msg = "Robot did not take the expected route"
-    assert all([
-        x in robot_cmd.visited_waypoints for x in [5, 6, 8]]), error_msg
+    assert robot_cmd.visited_waypoints == [
+        0, 0, 5, 5, 6, 6, 7,
+        6, 5, 5, 8, 8, 10,
+        8, 5, 5, 6, 6, 7,
+        6, 5, 5, 8, 8, 10], error_msg
 
 
 if __name__ == "__main__":
