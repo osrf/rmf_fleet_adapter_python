@@ -501,7 +501,9 @@ def main():
     
     test_graph_vis = \
         """
-                         10(D)
+        D - Dispenser
+        I - Ingestor
+                         10(I)
                           |
                           |
                           8------9
