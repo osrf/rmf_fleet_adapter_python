@@ -28,31 +28,6 @@ dropoff_name = "dropoff"
 dispenser_name = "mock_dispenser"
 ingestor_name = "mock_ingestor"
 
-###############################################################################
-# CONSTS
-###############################################################################
-
-INGESTOR_RESULT_ACKNOWLEDGED = 0
-INGESTOR_RESULT_SUCCESS = 1
-INGESTOR_RESULT_FAILED = 2
-
-INGESTOR_STATE_IDLE = 0
-INGESTOR_STATE_BUSY = 1
-INGESTOR_STATE_OFFLINE = 2
-
-DISPENSER_RESULT_ACKNOWLEDGED = 0
-DISPENSER_RESULT_SUCCESS = 1
-DISPENSER_RESULT_FAILED = 2
-
-DISPENSER_STATE_IDLE = 0
-DISPENSER_STATE_BUSY = 1
-DISPENSER_STATE_OFFLINE = 2
-
-TASK_STATE_QUEUED = 0
-TASK_STATE_ACTIVE = 1
-TASK_STATE_COMPLETED = 2
-TASK_STATE_FAILED = 3
-
 
 ###############################################################################
 # CLASSES
@@ -140,9 +115,9 @@ class MockDispenser(Node):
                     x.request_guid for x in self.tasks][
                         self.current_request_idx:]
             if state.request_guid_queue:
-                state.mode = DISPENSER_STATE_BUSY
+                state.mode = dispenser_msgs.DispenserState.BUSY
             else:
-                state.mode = DISPENSER_STATE_IDLE
+                state.mode = dispenser_msgs.DispenserState.IDLE
             state.seconds_remaining = self.dispense_duration_sec
             self.state_pub.publish(state)
 
@@ -163,7 +138,7 @@ class MockDispenser(Node):
                 # Send a success message
                 result = dispenser_msgs.DispenserResult()
                 result.time = self.get_clock().now().to_msg()
-                result.status = DISPENSER_RESULT_SUCCESS
+                result.status = dispenser_msgs.DispenserResult.SUCCESS
                 result.source_guid = self.name
                 result.request_guid = self.tasks[
                     self.current_request_idx].request_guid
@@ -246,9 +221,9 @@ class MockIngestor(Node):
                     x.request_guid for x in self.tasks][
                         self.current_request_idx:]
             if state.request_guid_queue:
-                state.mode = INGESTOR_STATE_BUSY
+                state.mode = ingestor_msgs.IngestorState.BUSY
             else:
-                state.mode = INGESTOR_STATE_IDLE
+                state.mode = ingestor_msgs.IngestorState.IDLE
             state.seconds_remaining = self.ingest_duration_sec
             self.state_pub.publish(state)
 
@@ -269,7 +244,7 @@ class MockIngestor(Node):
                 # Send a success message
                 result = ingestor_msgs.IngestorResult()
                 result.time = self.get_clock().now().to_msg()
-                result.status = INGESTOR_RESULT_SUCCESS
+                result.status = ingestor_msgs.IngestorResult.SUCCESS
                 result.source_guid = self.name
                 result.request_guid = self.tasks[
                     self.current_request_idx].request_guid
@@ -470,7 +445,7 @@ class TaskSummaryObserver(Node):
         if task_name not in self.tasks_status.keys():
             print('Observed Unaccounted Task. This should not happen')
             return
-        if msg.state == TASK_STATE_COMPLETED:
+        if msg.state == TaskSummary.STATE_COMPLETED:
             self.tasks_status[task_name] = True
 
 
