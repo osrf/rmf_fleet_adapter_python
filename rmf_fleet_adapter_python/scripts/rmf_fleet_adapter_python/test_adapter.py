@@ -28,6 +28,7 @@ dropoff_name = "dropoff"
 dispenser_name = "mock_dispenser"
 ingestor_name = "mock_ingestor"
 
+fleet_name = "test_fleet"
 
 ###############################################################################
 # CLASSES
@@ -377,6 +378,7 @@ class MockRobotCommand(adpt.RobotCommandHandle):
                         .get(previous_waypoint.graph_index, 0)
                     + 1
                 )
+
             else:
                 print("[RobotUpdateHandle] UPDATING ROBOT POSITION DEFAULT:",
                       previous_waypoint.position)
@@ -439,6 +441,9 @@ class TaskSummaryObserver(Node):
             if status_complete:
                 successful += 1
         return (successful, len(statuses))
+    
+    def reset(self):
+        self.tasks_status = {}
 
     def _process_task_summary_cb(self, msg):
         task_name = msg.task_id
@@ -531,7 +536,7 @@ def main():
 
     # Manages delivery or loop requests
     adapter = adpt.MockAdapter("TestDeliveryAdapter")
-    fleet = adapter.add_fleet("test_fleet", robot_traits, test_graph)
+    fleet = adapter.add_fleet(fleet_name, robot_traits, test_graph)
     fleet.accept_delivery_requests(lambda x: True)
 
     cmd_node = Node("RobotCommandHandle")
@@ -578,23 +583,20 @@ def main():
 
     # GO! =====================================================================
     adapter.start()
-
-    print("# SENDING NEW REQUEST ############################################")
-    test_name = 'test_delivery'
-    request = adpt.type.CPPDeliveryMsg(test_name,
-                                       pickup_name,
-                                       dispenser_name,
-                                       dropoff_name,
-                                       ingestor_name)
-    dispenser.reset()
-    ingestor.reset()
+    print("# SENDING NEW LOOP REQUEST #######################################")
+    test_name = 'test_loop'
+    request = adpt.type.CPPLoopMsg(test_name,
+                                   fleet_name,
+                                   2,
+                                   pickup_name,
+                                   dropoff_name)
+    observer.reset()
     observer.add_task(test_name)
-    adapter.request_delivery(request)
-    rclpy_executor.spin_once(1)
+    adapter.request_loop(request)
 
     for i in range(1000):
         if observer.all_tasks_complete():
-            print("All Tasks Complete.")
+            print("Loop Task Complete.")
             break
         rclpy_executor.spin_once(1)
         # time.sleep(0.2)
@@ -604,18 +606,45 @@ def main():
     print("Visited waypoints:", robot_cmd.visited_waypoints)
     print(f"Sucessful Tasks: {results[0]} / {results[1]}")
 
-    print("\n== CHECK ALL TASKS COMPLETE ==")
-    assert results[0] == results[1]  
-    print("== SUCCESS ==")
+    assert results[0] == results[1], "Not all tasks were completed."
+    error_msg = "Robot did not take the expected route"
+    assert all([x in robot_cmd.visited_waypoints for x in [5, 6, 8]]), error_msg
 
-    print("\n== CHECK ROBOT TOOK EXPECTED PATH ==")
-    assert all([x in robot_cmd.visited_waypoints for x in [5, 6, 7, 8, 10]])
-    assert robot_cmd.visited_waypoints[5] == 4
-    assert robot_cmd.visited_waypoints[6] == 3
-    assert robot_cmd.visited_waypoints[7] == 1
-    assert robot_cmd.visited_waypoints[8] == 2
-    assert robot_cmd.visited_waypoints[10] == 1
-    print("== SUCCESS ==")
+    print("# SENDING NEW DELIVERY REQUEST ###################################")
+    test_name = 'test_delivery'
+    request = adpt.type.CPPDeliveryMsg(test_name,
+                                       pickup_name,
+                                       dispenser_name,
+                                       dropoff_name,
+                                       ingestor_name)
+    dispenser.reset()
+    ingestor.reset()
+    observer.reset()
+    observer.add_task(test_name)
+    adapter.request_delivery(request)
+    rclpy_executor.spin_once(1)
+
+    for i in range(1000):
+        if observer.all_tasks_complete():
+            print("Delivery Task Complete.")
+            break
+        rclpy_executor.spin_once(1)
+        # time.sleep(0.2)
+
+    results = observer.count_successful_tasks()
+    print("\n== DEBUG TASK REPORT ==")
+    print("Visited waypoints:", robot_cmd.visited_waypoints)
+    print(f"Sucessful Tasks: {results[0]} / {results[1]}")
+
+    assert results[0] == results[1], "Not all tasks were completed."  
+
+    error_msg = "Robot did not take the expected route"
+    assert all([x in robot_cmd.visited_waypoints for x in [5, 6, 7, 8, 10]]), error_msg
+    assert robot_cmd.visited_waypoints[5] == 4, error_msg
+    assert robot_cmd.visited_waypoints[6] == 3, error_msg
+    assert robot_cmd.visited_waypoints[7] == 1, error_msg
+    assert robot_cmd.visited_waypoints[8] == 2, error_msg
+    assert robot_cmd.visited_waypoints[10] == 1, error_msg
 
     # Old assertions
     # assert all([x in robot_cmd.visited_waypoints for x in [0, 5, 6, 7, 8, 10]])
@@ -634,6 +663,7 @@ def main():
 
     rclpy_executor.shutdown()
     rclpy.shutdown()
+
 
 if __name__ == "__main__":
     main()
