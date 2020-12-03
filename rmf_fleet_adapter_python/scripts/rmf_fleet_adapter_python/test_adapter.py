@@ -473,21 +473,29 @@ def main():
     assert test_graph.get_waypoint(2).holding_point
     assert test_graph.get_waypoint(9).holding_point
     assert not test_graph.get_waypoint(10).holding_point
+
+    test_graph_legend = \
+        """
+        D : Dispenser
+        I : Ingestor
+        H : Holding Point
+        Numerals : Waypoints
+        ---- : Lanes
+        """
     
     test_graph_vis = \
+        test_graph_legend + \
         """
-        D - Dispenser
-        I - Ingestor
                          10(I)
                           |
                           |
-                          8------9
+                          8------9(H)
                           |      |
                           |      |
             3------4------5------6------7(D)
                           |      |
                           |      |
-                          1------2
+                          1------2(H)
                           |
                           |
                           0
@@ -598,6 +606,7 @@ def main():
 
     print("\n== CHECK ALL TASKS COMPLETE ==")
     assert results[0] == results[1]  
+    print("== SUCCESS ==")
 
     print("\n== CHECK ROBOT TOOK EXPECTED PATH ==")
     assert all([x in robot_cmd.visited_waypoints for x in [5, 6, 7, 8, 10]])
@@ -606,6 +615,7 @@ def main():
     assert robot_cmd.visited_waypoints[7] == 1
     assert robot_cmd.visited_waypoints[8] == 2
     assert robot_cmd.visited_waypoints[10] == 1
+    print("== SUCCESS ==")
 
     # Old assertions
     # assert all([x in robot_cmd.visited_waypoints for x in [0, 5, 6, 7, 8, 10]])
@@ -624,7 +634,6 @@ def main():
 
     rclpy_executor.shutdown()
     rclpy.shutdown()
-
 
 if __name__ == "__main__":
     main()
