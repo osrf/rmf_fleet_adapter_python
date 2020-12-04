@@ -185,6 +185,11 @@ def main():
         8, 5, 5, 6, 6, 7,
         6, 5, 5, 8, 8, 10], error_msg
 
+    cmd_node.destroy_node()
+    observer.destroy_node()
+    rclpy_executor.shutdown()
+    rclpy.shutdown()
+
 
 if __name__ == "__main__":
     main()
