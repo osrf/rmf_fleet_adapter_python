@@ -90,7 +90,8 @@ setup(
     cmdclass={'build_ext': CMakeBuild},
     zip_safe=False,
     entry_points={'console_scripts': [
-        'test_adapter = rmf_fleet_adapter_python.test_adapter:main'
+        'test_adapter = rmf_fleet_adapter_python.test_adapter:main',
+        'test_traffic_light = rmf_fleet_adapter_python.test_traffic_light:main'
     ]},
     license='Apache License, Version 2.0',
     install_requires=['setuptools'],
