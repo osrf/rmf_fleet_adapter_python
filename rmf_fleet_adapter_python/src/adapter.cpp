@@ -12,6 +12,7 @@
 #include "rmf_fleet_adapter/agv/test/MockAdapter.hpp"
 #include "rmf_fleet_adapter_python/PyRobotCommandHandle.hpp"
 #include <rmf_fleet_adapter/agv/Waypoint.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 namespace py = pybind11;
 namespace agv = rmf_fleet_adapter::agv;
@@ -25,6 +26,7 @@ void bind_shapes(py::module &);
 void bind_vehicletraits(py::module &);
 void bind_plan(py::module &);
 void bind_tests(py::module &);
+void bind_nodes(py::module &);
 
 PYBIND11_MODULE(rmf_adapter, m) {
     bind_types(m);
@@ -33,6 +35,7 @@ PYBIND11_MODULE(rmf_adapter, m) {
     bind_vehicletraits(m);
     bind_plan(m);
     bind_tests(m);
+    bind_nodes(m);
 
     // ROBOTCOMMAND HANDLE =====================================================
     // Abstract class
@@ -191,14 +194,20 @@ PYBIND11_MODULE(rmf_adapter, m) {
 
     // ADAPTER =================================================================
     // Light wrappers
-    py::class_<rclcpp::NodeOptions>(m, "NodeOptions");
+    py::class_<rclcpp::NodeOptions>(m, "NodeOptions")
+        .def(py::init<>());
+
     py::class_<rclcpp::Node, std::shared_ptr<rclcpp::Node> >(m, "Node")
         .def("now", [&](rclcpp::Node& self){
             return rmf_traffic_ros2::convert(self.now());
         });
 
-    // Python rclcpp init call
+    // Python rclcpp init and spin call
     m.def("init_rclcpp", [](){ rclcpp::init(0, nullptr); });
+    m.def("spin_rclcpp", [](rclcpp::Node::SharedPtr node_pt){
+        rclcpp::spin(node_pt);});
+    m.def("spin_some_rclcpp", [](rclcpp::Node::SharedPtr node_pt){
+        rclcpp::spin_some(node_pt);});
 
     py::class_<agv::Adapter, std::shared_ptr<agv::Adapter> >(m, "Adapter")
         // .def(py::init<>())  // Private constructor
@@ -225,7 +234,7 @@ PYBIND11_MODULE(rmf_adapter, m) {
                                py::overload_cast<>(&agv::Adapter::node))
         .def("start", &agv::Adapter::start)
         .def("stop", &agv::Adapter::stop)
-        .def("now", [&](agv::test::MockAdapter& self) {
+        .def("now", [&](agv::Adapter& self) {
             return TimePoint(rmf_traffic_ros2::convert(self.node()->now())
                                  .time_since_epoch());
         });
