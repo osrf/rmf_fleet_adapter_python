@@ -6,4 +6,4 @@ pydoc3 -w rmf_adapter \
           rmf_adapter.graph \
           rmf_adapter.nodes \
           rmf_adapter.easy_traffic_light
-
+mv rmf_adapter.html index.html
