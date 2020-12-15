@@ -34,14 +34,14 @@ def init_graph():
 
     test_graph_vis = \
         """
-                         6 (bot2 end)
-                         |
-    (bot1 start)         |
-    1------2------3------4-----5 (bot1 end)
-                  |
-                  |
-                  0 (bot2 start)
-    """
+                            6 (bot2 end)
+                            |
+        (bot1 start)         |
+        1------2------3------4-----5 (bot1 end)
+                    |
+                    |
+                    0 (bot2 start)
+        """
     print(test_graph_vis)
     print(f"dummybot1 path {bot1_path}")
     print(f"dummybot2 path {bot2_path}")

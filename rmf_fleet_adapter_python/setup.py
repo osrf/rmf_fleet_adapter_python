@@ -89,7 +89,7 @@ setup(
     zip_safe=False,
     entry_points={'console_scripts': [
         'test_adapter = scripts.test_adapter:main',
-        'schedule_blockage_nodes = examples.schedule_blockage_nodes:main',
+        'schedule_blockade_nodes = examples.schedule_blockade_nodes:main',
         'traffic_light = examples.traffic_light:main'
     ]},
     license='Apache License, Version 2.0',

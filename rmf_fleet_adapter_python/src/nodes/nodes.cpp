@@ -19,8 +19,8 @@ namespace py = pybind11;
 void bind_nodes(py::module &m) {
   auto m_nodes = m.def_submodule("nodes");
 
-  // Make blockage Node
-  m_nodes.def("make_blockage", &rmf_traffic_ros2::blockade::make_node,
+  // Make blockade_Node
+  m_nodes.def("make_blockade", &rmf_traffic_ros2::blockade::make_node,
               py::arg("options"));
 
   // Make Schedule Node

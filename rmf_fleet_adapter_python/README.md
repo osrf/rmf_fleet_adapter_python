@@ -50,7 +50,7 @@ This will showcase an example of having 2 "traffic light" robots using RMF.
 
 ```bash
 # First Terminal
-ros2 run rmf_fleet_adapter_python schedule_blockage_nodes
+ros2 run rmf_fleet_adapter_python schedule_blockade_nodes
 
 # Second Terminal
 ros2 run rmf_fleet_adapter_python traffic_light

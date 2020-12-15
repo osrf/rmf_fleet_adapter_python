@@ -20,14 +20,14 @@ import rmf_adapter.nodes as nodes
 def main():
     adpt.init_rclcpp()
 
-    print("Creating Sceduler and Blockage Node")
-    blockage_node = nodes.make_blockage(adpt.NodeOptions())
+    print("Creating Sceduler and Blockade Node")
+    blockade_node = nodes.make_blockade(adpt.NodeOptions())
     schedule_node = nodes.make_schedule(adpt.NodeOptions())
 
     print("spinning rclcpp")
     while True:
         try:
-            adpt.spin_some_rclcpp(blockage_node)
+            adpt.spin_some_rclcpp(blockade_node)
             adpt.spin_some_rclcpp(schedule_node)
             time.sleep(0.1)
         except RuntimeError as e:
