@@ -55,8 +55,8 @@ class MockTrafficLightHandle:
         self.name = name
         self.handler = None
         self.path_checkpoints = []
-        self.coors = [[3, 0, 0], [1, 1, 0], [2, 1, 0],
-                      [3, 1, 0], [4, 1, 0], [5, 1, 0], [4, 3, 0]]
+        self.coordinates = [[3, 0, 0], [1, 1, 0], [2, 1, 0],
+                            [3, 1, 0], [4, 1, 0], [5, 1, 0], [4, 3, 0]]
         pass
 
     def traffic_light_cb(self, ez_traffic_light):
@@ -64,11 +64,11 @@ class MockTrafficLightHandle:
         self.handler = ez_traffic_light
 
     def pause_cb(self):
-        print("Iam told to pause")
+        print("I was told to pause")
         pass
 
     def resume_cb(self):
-        print("Iam told to resume")
+        print("I was told to resume")
         pass
 
     def pub_follow_path(self, path=[]):
@@ -76,7 +76,8 @@ class MockTrafficLightHandle:
         self.path_checkpoints = path
         _path = []
         for i in path:
-            _path.append(adpt.Waypoint("test_map", self.coors[i], 0.1, True))
+            _path.append(adpt.Waypoint(
+                "test_map", self.coordinates[i], 0.0, True))
         self.handler.follow_new_path(_path)
 
     def move_robot(self, curr_checkpoint):
@@ -88,7 +89,7 @@ class MockTrafficLightHandle:
                 break
 
         time.sleep(0.2)
-        wp = self.coors[self.path_checkpoints[curr_checkpoint + 1]]
+        wp = self.coordinates[self.path_checkpoints[curr_checkpoint + 1]]
         result = self.handler.moving_from(curr_checkpoint, wp)
         print(f"[{self.name}] moved to {curr_checkpoint + 1} \
                 result: {result}")
