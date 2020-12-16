@@ -91,7 +91,17 @@ PYBIND11_MODULE(rmf_adapter, m) {
              py::arg("max_merge_lane_distance") = 1.0,
              py::arg("min_lane_length") = 1e-8,
              py::call_guard<py::scoped_ostream_redirect,
-                            py::scoped_estream_redirect>());
+                            py::scoped_estream_redirect>())
+        .def("update_battery_soc", &agv::RobotUpdateHandle::update_battery_soc,
+             py::arg("battery_soc"),
+             py::call_guard<py::scoped_ostream_redirect,
+                            py::scoped_estream_redirect>())
+        .def_property("maximum_delay",
+             py::overload_cast<>(
+                 &agv::RobotUpdateHandle::maximum_delay, py::const_),
+             [&](agv::RobotUpdateHandle& self){
+                 return self.maximum_delay();
+             });
 
     // FLEETUPDATE HANDLE ======================================================
     py::class_<agv::FleetUpdateHandle,
@@ -116,8 +126,23 @@ PYBIND11_MODULE(rmf_adapter, m) {
              py::arg("profile"),
              py::arg("start"),
              py::arg("handle_cb"))
+        .def("set_recharge_threshold", 
+             &agv::FleetUpdateHandle::set_recharge_threshold,
+             py::arg("threshold"))
+        // NOTE: deprecated 
         .def("accept_delivery_requests",
-             &agv::FleetUpdateHandle::accept_delivery_requests);
+             &agv::FleetUpdateHandle::accept_delivery_requests,
+             "NOTE: deprecated, use accept_task_reqeusts() instead")
+        .def("accept_task_requests",
+             &agv::FleetUpdateHandle::accept_task_requests,
+             py::arg("check"),
+             "Provide a callback function which will accept rmf tasks requests")
+        .def_property("default_maximum_delay",
+             py::overload_cast<>(
+                 &agv::FleetUpdateHandle::default_maximum_delay, py::const_),
+             [&](agv::FleetUpdateHandle& self){
+                 return self.default_maximum_delay();
+             });
 
     // EASY TRAFFIC LIGHT HANDLE ===============================================
     py::class_<agv::Waypoint>(m, "Waypoint")

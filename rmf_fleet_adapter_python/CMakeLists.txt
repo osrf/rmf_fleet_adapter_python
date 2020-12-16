@@ -20,6 +20,8 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 find_package(rmf_fleet_adapter REQUIRED)
+find_package(rmf_task REQUIRED)
+find_package(rmf_battery REQUIRED)
 find_package(rmf_task_msgs REQUIRED)
 
 include_directories(
@@ -50,6 +52,9 @@ target_include_directories(rmf_adapter
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     ${rmf_traffic_ros2_INCLUDE_DIRS}
+    ${rmf_traffic_ros2_INCLUDE_DIRS}
+    ${rmf_battery_INCLUDE_DIRS}
+    ${rmf_task_INCLUDE_DIRS}
     ${rmf_fleet_msgs_INCLUDE_DIRS}
     ${rclcpp_INCLUDE_DIRS}
   PRIVATE
