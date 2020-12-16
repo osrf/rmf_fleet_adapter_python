@@ -14,8 +14,13 @@
 #include <rmf_fleet_adapter/agv/Waypoint.hpp>
 #include <rclcpp/rclcpp.hpp>
 
+#include <rmf_battery/agv/BatterySystem.hpp>
+#include <rmf_battery/agv/SimpleMotionPowerSink.hpp>
+#include <rmf_battery/agv/SimpleDevicePowerSink.hpp>
+
 namespace py = pybind11;
 namespace agv = rmf_fleet_adapter::agv;
+namespace battery = rmf_battery::agv;
 
 using TimePoint = std::chrono::time_point<std::chrono::system_clock,
                                           std::chrono::nanoseconds>;
@@ -27,6 +32,7 @@ void bind_vehicletraits(py::module &);
 void bind_plan(py::module &);
 void bind_tests(py::module &);
 void bind_nodes(py::module &);
+void bind_battery(py::module &);
 
 PYBIND11_MODULE(rmf_adapter, m) {
     bind_types(m);
@@ -36,6 +42,7 @@ PYBIND11_MODULE(rmf_adapter, m) {
     bind_plan(m);
     bind_tests(m);
     bind_nodes(m);
+    bind_battery(m);
 
     // ROBOTCOMMAND HANDLE =====================================================
     // Abstract class
@@ -126,6 +133,26 @@ PYBIND11_MODULE(rmf_adapter, m) {
              py::arg("profile"),
              py::arg("start"),
              py::arg("handle_cb"))
+        .def("set_task_planner_params", 
+             [&](agv::FleetUpdateHandle& self,
+                battery::BatterySystem& b_sys,
+                battery::SimpleMotionPowerSink& m_sink,
+                battery::SimpleDevicePowerSink& a_sink,
+                battery::SimpleDevicePowerSink& t_sink)
+             {
+                return self.set_task_planner_params(
+                    std::make_shared<battery::BatterySystem>(b_sys),
+                    std::make_shared<battery::SimpleMotionPowerSink>(m_sink), 
+                    std::make_shared<battery::SimpleDevicePowerSink>(a_sink),
+                    std::make_shared<battery::SimpleDevicePowerSink>(t_sink));
+             },
+             py::arg("battery_system"),
+             py::arg("motion_sink"),
+             py::arg("ambient_sink"),
+             py::arg("tool_sink"))
+        .def("account_for_battery_drain",
+             &agv::FleetUpdateHandle::account_for_battery_drain,
+             py::arg("value") = true)
         .def("set_recharge_threshold", 
              &agv::FleetUpdateHandle::set_recharge_threshold,
              py::arg("threshold"))

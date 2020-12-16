@@ -27,6 +27,8 @@ import rmf_adapter.easy_traffic_light as traffic_light
 import time
 from threading import Thread
 
+# assertion var
+visited_waypoints = []
 
 def init_graph():
     bot1_path = [1, 2, 3, 4, 5]
@@ -34,13 +36,13 @@ def init_graph():
 
     test_graph_vis = \
         """
-                            6 (bot2 end)
-                            |
+                             6 (bot2 end)
+                             |
         (bot1 start)         |
         1------2------3------4-----5 (bot1 end)
-                    |
-                    |
-                    0 (bot2 start)
+                      |
+                      |
+                      0 (bot2 start)
         """
     print(test_graph_vis)
     print(f"dummybot1 path {bot1_path}")
@@ -96,6 +98,9 @@ class MockTrafficLightHandle:
         if result == traffic_light.MovingInstruction.MovingError:
             return False
         else:
+            # for assertion
+            visited_waypoints.append(
+                (self.name, self.path_checkpoints[curr_checkpoint + 1]))
             return True
 
 
@@ -156,6 +161,16 @@ def main():
     th2.start()
     th1.join()
     th2.join()
+
+    print(f"Sequence of visited waypoints: \n{visited_waypoints}")
+    assert visited_waypoints == [
+        ("dummybot2", 3), 
+        ("dummybot2", 4), 
+        ("dummybot1", 2), 
+        ("dummybot2", 6), 
+        ("dummybot1", 3), 
+        ("dummybot1", 4), 
+        ("dummybot1", 5)], "Sequence seems to be incorrect, pls check"
 
     print("Done Traffic Light Tutorial!")
     rclpy.shutdown()

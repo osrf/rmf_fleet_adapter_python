@@ -6,6 +6,7 @@ import rmf_adapter as adpt
 import rmf_adapter.vehicletraits as traits
 import rmf_adapter.geometry as geometry
 import rmf_adapter.graph as graph
+import rmf_adapter.battery as battery
 import rmf_adapter.plan as plan
 
 from rmf_fleet_adapter_python.test_utils import MockRobotCommand
@@ -114,6 +115,19 @@ def main():
     adapter = adpt.MockAdapter("TestDeliveryAdapter")
     fleet = adapter.add_fleet(fleet_name, robot_traits, test_graph)
     fleet.accept_delivery_requests(lambda x: True)
+    
+    # TODO(YL) accept new task req
+    fleet.accept_task_requests(lambda x: True)
+
+    # add battery profile
+    battery_sys = battery.BatterySystem.make(24.0, 40.0, 8.8)
+    motion_sink = battery.SimpleMotionPowerSink(battery_sys, 70.0, 40.0, 0.22)
+    ambient_sink = battery.SimpleDevicePowerSink(battery_sys, 20.0)
+    tool_sink = battery.SimpleDevicePowerSink(battery_sys, 10.0)
+
+    b_success = fleet.set_task_planner_params(
+        battery_sys, motion_sink, ambient_sink, tool_sink)
+    assert b_success, "set battery param failed"
 
     cmd_node = Node("RobotCommandHandle")
 

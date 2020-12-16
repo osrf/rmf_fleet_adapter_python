@@ -43,6 +43,7 @@ pybind11_add_module(rmf_adapter
   src/planner/planner.cpp
   src/nodes/nodes.cpp
   src/vehicletraits/vehicletraits.cpp
+  src/battery/battery.cpp
 )
 target_link_libraries(rmf_adapter PRIVATE
   rmf_fleet_adapter::rmf_fleet_adapter)
