@@ -43,7 +43,7 @@ void bind_shapes(py::module &m)
       .def_property("radius",
                     &geometry::Circle::get_radius,
                     &geometry::Circle::set_radius,
-                    "set or get radius");
+                    "set or get radius")
       .def("finalize", &geometry::Circle::finalize)
       .def("finalize_convex", &geometry::Circle::finalize_convex);
 
