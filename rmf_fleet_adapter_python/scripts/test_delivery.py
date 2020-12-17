@@ -115,7 +115,7 @@ def main():
     adapter = adpt.MockAdapter("TestDeliveryAdapter")
     fleet = adapter.add_fleet(fleet_name, robot_traits, test_graph)
     fleet.accept_delivery_requests(lambda x: True)
-    
+
     # TODO(YL) accept new task req
     fleet.accept_task_requests(lambda x: True)
 
@@ -124,10 +124,13 @@ def main():
     motion_sink = battery.SimpleMotionPowerSink(battery_sys, 70.0, 40.0, 0.22)
     ambient_sink = battery.SimpleDevicePowerSink(battery_sys, 20.0)
     tool_sink = battery.SimpleDevicePowerSink(battery_sys, 10.0)
-
+    
+    fleet.set_recharge_threshold(50.0)
     b_success = fleet.set_task_planner_params(
         battery_sys, motion_sink, ambient_sink, tool_sink)
+    
     assert b_success, "set battery param failed"
+    exit(0)
 
     cmd_node = Node("RobotCommandHandle")
 
@@ -186,6 +189,8 @@ def main():
     ingestor.reset()
     observer.reset()
     observer.add_task(test_name)
+
+    # TODO, replace this with dispatch_task
     adapter.request_delivery(request)
     rclpy_executor.spin_once(1)
 

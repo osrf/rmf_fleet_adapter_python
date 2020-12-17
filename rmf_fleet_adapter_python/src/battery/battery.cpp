@@ -26,9 +26,12 @@ void bind_battery(py::module &m)
                   py::arg("nominal_voltage"),
                   py::arg("capacity"),
                   py::arg("charging_current"))
-      .def("get_nominal_voltage", &agv::BatterySystem::nominal_voltage)
-      .def("get_capacity", &agv::BatterySystem::capacity)
-      .def("get_charging_current", &agv::BatterySystem::charging_current);
+      .def_property_readonly("get_nominal_voltage",
+        &agv::BatterySystem::nominal_voltage)
+      .def_property_readonly("get_capacity",
+        &agv::BatterySystem::capacity)
+      .def_property_readonly("get_charging_current",
+        &agv::BatterySystem::charging_current);
 
   // motion sink
   py::class_<agv::SimpleMotionPowerSink>(m_battery, "SimpleMotionPowerSink")
@@ -49,17 +52,20 @@ void bind_battery(py::module &m)
         py::arg("inertia"),
         py::arg("friction_coefficient"),
          "Note: MechanicalSystem is being abstracted")
-      .def("get_battery_system",
+      .def_property_readonly("get_battery_system",
            &agv::SimpleMotionPowerSink::battery_system)
-      // .def("get_mechanical_system", 
+      // .def_property_readonly("get_mechanical_system", 
       //      &agv::SimpleMotionPowerSink::mechanical_system)
-      .def("get_mass", [&](agv::SimpleMotionPowerSink &self){
+      .def_property_readonly("get_mass",
+        [&](agv::SimpleMotionPowerSink &self){
           return self.mechanical_system().mass();
         })
-      .def("get_inertia", [&](agv::SimpleMotionPowerSink &self){
+      .def_property_readonly("get_inertia",
+        [&](agv::SimpleMotionPowerSink &self){
           return self.mechanical_system().inertia();
         })
-      .def("get_friction_coefficient", [&](agv::SimpleMotionPowerSink &self){
+      .def_property_readonly("get_friction_coefficient",
+        [&](agv::SimpleMotionPowerSink &self){
           return self.mechanical_system().friction_coefficient();
         });
 
@@ -77,9 +83,12 @@ void bind_battery(py::module &m)
         py::arg("battery_system"),
         py::arg("power_system_nominal_voltage"),
         "Note: PowerSystem is being abstracted")
-      .def("get_battery_system", &agv::SimpleDevicePowerSink::battery_system)
-      // .def("get_power_system", &agv::SimpleDevicePowerSink::power_system)
-      .def("get_norminal_power", [&](agv::SimpleDevicePowerSink &self){
+      .def_property_readonly("get_battery_system",
+        &agv::SimpleDevicePowerSink::battery_system)
+      // .def_property_readonly("get_power_system", 
+      //   &agv::SimpleDevicePowerSink::power_system)
+      .def_property_readonly("get_norminal_power",
+        [&](agv::SimpleDevicePowerSink &self){
           return self.power_system().nominal_power();
         });
 }
