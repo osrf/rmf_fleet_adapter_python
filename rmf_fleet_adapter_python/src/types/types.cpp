@@ -16,6 +16,7 @@
 
 #include <rmf_task_msgs/msg/delivery.hpp>
 #include <rmf_task_msgs/msg/loop.hpp>
+#include <rmf_task_msgs/msg/task_profile.hpp>
 
 namespace py = pybind11;
 
@@ -39,6 +40,24 @@ rmf_task_msgs::msg::Delivery make_delivery_msg(
 }
 
 rmf_task_msgs::msg::Loop make_loop_msg(
+  std::string task_id,
+  std::string robot_type,
+  uint32_t num_loops,
+  std::string start_name,
+  std::string finish_name)
+{
+  rmf_task_msgs::msg::Loop request;
+  request.task_id = task_id;
+  request.robot_type = robot_type;
+  request.num_loops = num_loops;
+
+  request.start_name = start_name;
+  request.finish_name = finish_name;
+
+  return request;
+}
+
+rmf_task_msgs::msg::Loop make_task_profile_msg(
   std::string task_id,
   std::string robot_type,
   uint32_t num_loops,
@@ -146,4 +165,30 @@ void bind_types(py::module &m) {
                     [&](rmf_task_msgs::msg::Loop& self,
                        std::string finish_name){
                         self.finish_name = finish_name;});
+
+  // TODO: Support More elements (e.g. start_time, loop.....)!
+  py::class_<rmf_task_msgs::msg::TaskProfile>(m_type, "CPPTaskProfileMsg")
+      .def(py::init<>())
+      .def_property("task_id",
+                    [&](rmf_task_msgs::msg::TaskProfile& self){
+                        return self.task_id;},
+                    [&](rmf_task_msgs::msg::TaskProfile& self,
+                       std::string task_id){
+                        self.task_id = task_id;})
+      .def_property("delivery",
+                    [&](rmf_task_msgs::msg::TaskProfile& self){
+                        return self.delivery;},
+                    [&](rmf_task_msgs::msg::TaskProfile& self,
+                       rmf_task_msgs::msg::Delivery delivery){
+                        self.task_type.type = self.task_type.TYPE_DELIVERY;
+                        self.delivery = delivery;},
+                    "Delivery Task, this will ovewrite the prev type")
+      .def_property("loop",
+                    [&](rmf_task_msgs::msg::TaskProfile& self){
+                        return self.loop;},
+                    [&](rmf_task_msgs::msg::TaskProfile& self,
+                       rmf_task_msgs::msg::Loop loop){
+                        self.task_type.type = self.task_type.TYPE_LOOP;
+                        self.loop = loop;},
+                    "Loop Task, this will ovewrite the prev type");
 }

@@ -116,21 +116,23 @@ def main():
     fleet = adapter.add_fleet(fleet_name, robot_traits, test_graph)
     fleet.accept_delivery_requests(lambda x: True)
 
-    # TODO(YL) accept new task req
-    fleet.accept_task_requests(lambda x: True)
+    # TODO(YL) accept and check incoming new task
+    def task_request_cb(task):
+        return True
+
+    fleet.accept_task_requests(task_request_cb)
 
     # add battery profile
     battery_sys = battery.BatterySystem.make(24.0, 40.0, 8.8)
     motion_sink = battery.SimpleMotionPowerSink(battery_sys, 70.0, 40.0, 0.22)
     ambient_sink = battery.SimpleDevicePowerSink(battery_sys, 20.0)
     tool_sink = battery.SimpleDevicePowerSink(battery_sys, 10.0)
-    
-    fleet.set_recharge_threshold(50.0)
+
+    fleet.set_recharge_threshold(0.2)
     b_success = fleet.set_task_planner_params(
         battery_sys, motion_sink, ambient_sink, tool_sink)
-    
+
     assert b_success, "set battery param failed"
-    exit(0)
 
     cmd_node = Node("RobotCommandHandle")
 
@@ -149,6 +151,7 @@ def main():
 
     # Lambda to insert an adapter
     def updater_inserter(handle_obj, updater):
+        updater.update_battery_soc(1.0)
         handle_obj.updater = updater
 
     # Manages and executes robot commands
@@ -190,8 +193,6 @@ def main():
     observer.reset()
     observer.add_task(test_name)
 
-    # TODO, replace this with dispatch_task
-    adapter.request_delivery(request)
     rclpy_executor.spin_once(1)
 
     for i in range(1000):

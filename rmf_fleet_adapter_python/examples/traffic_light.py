@@ -83,7 +83,7 @@ class MockTrafficLightHandle:
         self.handler.follow_new_path(_path)
 
     def move_robot(self, curr_checkpoint):
-        print(f"[{self.name}] wait to move from {curr_checkpoint}")
+        print(f"[{self.name}] wait at checkpoint {curr_checkpoint}")
         for _ in range(100):
             result = self.handler.waiting_at(curr_checkpoint)
             time.sleep(0.5)
@@ -91,16 +91,15 @@ class MockTrafficLightHandle:
                 break
 
         time.sleep(0.2)
-        wp = self.coordinates[self.path_checkpoints[curr_checkpoint + 1]]
-        result = self.handler.moving_from(curr_checkpoint, wp)
-        print(f"[{self.name}] moved to {curr_checkpoint + 1} \
-                result: {result}")
+        nxt_wp = self.path_checkpoints[curr_checkpoint + 1]
+        nxt_wp_coor = self.coordinates[wp]
+        result = self.handler.moving_from(curr_checkpoint, nxt_wp_coor)
+        print(f"[{self.name}] moved to {nxt_wp}, result: {result}")
         if result == traffic_light.MovingInstruction.MovingError:
             return False
         else:
             # for assertion
-            visited_waypoints.append(
-                (self.name, self.path_checkpoints[curr_checkpoint + 1]))
+            visited_waypoints.append((self.name, nxt_wp))
             return True
 
 

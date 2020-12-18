@@ -306,8 +306,9 @@ PYBIND11_MODULE(rmf_adapter, m) {
         .def_property_readonly("node",
                                py::overload_cast<>(
                                    &agv::test::MockAdapter::node))
-        .def("request_delivery", &agv::test::MockAdapter::request_delivery) // Exposed for testing
-        .def("request_loop", &agv::test::MockAdapter::request_loop) // Exposed for testing
+        // TODO(YL) replace these with "dispatch_task()" method
+        // .def("request_delivery", &agv::test::MockAdapter::request_delivery) // Exposed for testing
+        // .def("request_loop", &agv::test::MockAdapter::request_loop) // Exposed for testing
         .def("start", &agv::test::MockAdapter::start)
         .def("stop", &agv::test::MockAdapter::stop)
         .def("now", [&](agv::test::MockAdapter& self) {
