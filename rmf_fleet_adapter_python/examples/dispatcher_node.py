@@ -20,37 +20,45 @@ import rmf_adapter.nodes as Nodes
 from threading import Thread
 
 
+def submit_task_thread(mod):
+    time.sleep(2)
+    task_desc = Type.CPPTaskDescriptionMsg()
+    task_desc.delivery = adpt.type.CPPDeliveryMsg()
+    print("Sumbiting 2 sample delivery tasks")
+    id1 = mod.submit_task(task_desc)
+    id2 = mod.submit_task(task_desc)
+    print(f" active list >>  {mod.get_active_task_ids()}")
+
+    time.sleep(3)
+    print("---- Assertion ----")
+    state1 = mod.get_task_state(id1)
+    state2 = mod.get_task_state(id2)
+    state3 = mod.get_task_state("null_id")
+    print(f" {id1}: {state1}   \n {id2}: {state2} \n null_id: {state3}")
+
+    assert state1 == Nodes.TaskState.Failed, "state should fail cuz no bid"
+    assert state2 == Nodes.TaskState.Pending, "state should be pending"
+    assert state3 == None, "state should be none"
+    assert mod.cancel_task(id2), "failed to cancel task"
+
+    # check if task is canceled
+    state2 = mod.get_task_state(id2)
+    print(f" Canceled:: {id2}: {state2} \n")
+    assert state2 == Nodes.TaskState.Canceled, "task should be canceled"
+    print("Done Check")
+
+
 def main():
+    print("Starting Simple Dispatcher Node")
     adpt.init_rclcpp()
+    dispatcher = Nodes.DispatcherNode.make_node("sample_dispatcher_node")
 
-    print("Creating Simple Dispatcher Node")
-    dispatcher = Nodes.DispatcherNode.make("sample_dispatcher_node")
-
-    # submit a dummy task
-    def submit_task(mod):
-        time.sleep(2)
-        profile = Type.CPPTaskProfileMsg()
-        profile.delivery = adpt.type.CPPDeliveryMsg()
-        print("initated Task")
-        id1 = mod.submit_task(profile)
-        id2 = mod.submit_task(profile)
-        print(f" active list >>  {mod.get_active_task_ids()}")
-
-        time.sleep(3)
-        state1 = mod.get_task_state(id1)
-        state2 = mod.get_task_state(id2)
-
-        print(f"state: Task 1 > {state1}, Task 2 > {state2}")
-        print("Done")
-
-    print("spinning dispatcher")
-    th1 = Thread(target=submit_task, args=(dispatcher,))
+    th1 = Thread(target=submit_task_thread, args=(dispatcher,))
     th1.start()
 
-    print("spinning rclcpp")
     while True:
         adpt.spin_some_rclcpp(dispatcher.node())
-        time.sleep(0.1)
+        time.sleep(0.2)
 
     print("Exiting")
 

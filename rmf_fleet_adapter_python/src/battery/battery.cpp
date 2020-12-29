@@ -49,7 +49,7 @@ void bind_battery(py::module &m)
         }),
         py::arg("battery_system"),
         py::arg("mass"),
-        py::arg("inertia"),
+        py::arg("moment_of_inertia"),
         py::arg("friction_coefficient"),
          "Note: MechanicalSystem is being abstracted")
       .def_property_readonly("get_battery_system",
@@ -60,9 +60,9 @@ void bind_battery(py::module &m)
         [&](agv::SimpleMotionPowerSink &self){
           return self.mechanical_system().mass();
         })
-      .def_property_readonly("get_inertia",
+      .def_property_readonly("get_moment of_inertia",
         [&](agv::SimpleMotionPowerSink &self){
-          return self.mechanical_system().inertia();
+          return self.mechanical_system().moment_of_inertia();
         })
       .def_property_readonly("get_friction_coefficient",
         [&](agv::SimpleMotionPowerSink &self){

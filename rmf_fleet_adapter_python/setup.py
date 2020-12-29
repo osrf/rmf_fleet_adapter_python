@@ -90,6 +90,7 @@ setup(
     entry_points={'console_scripts': [
         'test_adapter = scripts.test_adapter:main',
         'schedule_blockade_nodes = examples.schedule_blockade_nodes:main',
+        'dispatcher_node = examples.dispatcher_node:main',
         'traffic_light = examples.traffic_light:main'
     ]},
     license='Apache License, Version 2.0',
