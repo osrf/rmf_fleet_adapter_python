@@ -8,7 +8,7 @@ from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 package_name = "rmf_fleet_adapter_python"
 
 
@@ -77,7 +77,8 @@ class CMakeBuild(build_ext):
 setup(
     name=package_name,
     version=__version__,
-    packages=['examples', 'scripts'],
+    packages=['rmf_fleet_adapter_python'],
+    package_dir={'rmf_fleet_adapter_python':'scripts'},
     author='methylDragon',
     author_email='methylDragon@gmail.com',
     url='',
@@ -88,7 +89,9 @@ setup(
     cmdclass={'build_ext': CMakeBuild},
     zip_safe=False,
     entry_points={'console_scripts': [
-        'test_adapter = scripts.test_adapter:main',
+        'test_adapter = rmf_fleet_adapter_python.test_adapter:main',
+        'test_delivery = rmf_fleet_adapter_python.test_delivery:main',
+        'test_loop = rmf_fleet_adapter_python.test_loop:main',
         'schedule_blockade_nodes = examples.schedule_blockade_nodes:main',
         'dispatcher_node = examples.dispatcher_node:main',
         'traffic_light = examples.traffic_light:main'
