@@ -42,6 +42,7 @@ using TaskType = rmf_task_msgs::msg::TaskType;
 using Loop = rmf_task_msgs::msg::Loop;
 using Delivery = rmf_task_msgs::msg::Delivery;
 using TaskDescription = rmf_task_msgs::msg::TaskDescription;
+using TaskProfile = rmf_task_msgs::msg::TaskProfile;
 
 Delivery make_delivery_msg(
     std::string task_id,
@@ -161,7 +162,7 @@ void bind_types(py::module &m)
             [&](Loop &self,
                 std::string finish_name) { self.finish_name = finish_name; });
 
-    // TODO: Support More elements (e.g. start_time, loop.....)!
+    // TODO: Support More task_types
     py::class_<TaskDescription>(m_type, "CPPTaskDescriptionMsg")
         .def(py::init<>())
         .def_property(
@@ -170,12 +171,40 @@ void bind_types(py::module &m)
             [&](TaskDescription &self, Delivery delivery) {
                         self.task_type.type = TaskType::TYPE_DELIVERY;
                         self.delivery = delivery; },
-            "Delivery Task, this will ovewrite the prev type")
+            "Delivery Task, this will ovewrite the previous type")
         .def_property(
             "loop",
             [&](TaskDescription &self) { return self.loop; },
             [&](TaskDescription &self, Loop loop) {
                         self.task_type.type = TaskType::TYPE_LOOP;
                         self.loop = loop; },
-            "Loop Task, this will ovewrite the prev type");
+            "Loop Task, this will ovewrite the previous type")
+        .def_property(
+            "start_time_sec",
+            [&](TaskDescription &self) { return self.start_time.sec; },
+            [&](TaskDescription &self, int start_time_sec) {
+                        self.start_time.sec = start_time_sec;},
+            "Start time, represented in sec precision")
+        .def_property_readonly(
+            "task_type",
+            [&](TaskDescription &self) { return self.task_type.type; });
+
+    py::class_<TaskProfile>(m_type, "CPPTaskProfileMsg")
+        .def(py::init<>())
+        .def_property(
+            "description",
+            [&](TaskProfile &self) { return self.description; },
+            [&](TaskProfile &self, TaskDescription description) {
+                        self.description = description; })
+        .def_property(
+            "task_id",
+            [&](TaskProfile &self) { return self.task_id; },
+            [&](TaskProfile &self, std::string task_id) {
+                        self.task_id = task_id; })
+        .def_property(
+            "submission_time_sec",
+            [&](TaskProfile &self) { return self.submission_time.sec; },
+            [&](TaskProfile &self, int submission_time_sec) {
+                        self.submission_time.sec = submission_time_sec;},
+            "submission time, represented in sec precision");
 }

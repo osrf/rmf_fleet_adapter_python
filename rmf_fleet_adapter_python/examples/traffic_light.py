@@ -92,7 +92,7 @@ class MockTrafficLightHandle:
 
         time.sleep(0.2)
         nxt_wp = self.path_checkpoints[curr_checkpoint + 1]
-        nxt_wp_coor = self.coordinates[wp]
+        nxt_wp_coor = self.coordinates[nxt_wp]
         result = self.handler.moving_from(curr_checkpoint, nxt_wp_coor)
         print(f"[{self.name}] moved to {nxt_wp}, result: {result}")
         if result == traffic_light.MovingInstruction.MovingError:
