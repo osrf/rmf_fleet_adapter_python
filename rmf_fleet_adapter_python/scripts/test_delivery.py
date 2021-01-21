@@ -117,11 +117,10 @@ def main():
     fleet = adapter.add_fleet(fleet_name, robot_traits, test_graph)
 
     # Set up task request callback function
-    def task_request_cb(task):
-        assert task.task_id == test_name
+    def task_request_cb(task_profile):
+        assert task_profile.task_id == test_name
         from rmf_task_msgs.msg import TaskType
-        assert task.description.task_type == TaskType.TYPE_DELIVERY
-        print("\nDEBUG!!! ", task_desc.start_time_sec)
+        assert task_profile.description.task_type == TaskType.TYPE_DELIVERY
         return True
 
     fleet.accept_task_requests(task_request_cb)
@@ -197,8 +196,7 @@ def main():
     task_desc = Type.CPPTaskDescriptionMsg()
     # this is the time when the robot reaches the pick up point
     task_desc.start_time_sec = int(time.time()) + 50
-    task_desc.delivery = Type.CPPDeliveryMsg(test_name,
-                                             pickup_name,
+    task_desc.delivery = Type.CPPDeliveryMsg(pickup_name,
                                              dispenser_name,
                                              dropoff_name,
                                              ingestor_name)

@@ -188,8 +188,7 @@ def main():
     task_desc = Type.CPPTaskDescriptionMsg()
     # this is the time when the robot reaches the start waypoint for loop
     task_desc.start_time_sec = int(time.time()) + 50
-    task_desc.loop = adpt.type.CPPLoopMsg(test_name,
-                                          fleet_name,
+    task_desc.loop = adpt.type.CPPLoopMsg(fleet_name,
                                           loop_count,
                                           start_name,
                                           finish_name)

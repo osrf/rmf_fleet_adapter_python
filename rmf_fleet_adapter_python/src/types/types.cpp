@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Open Source Robotics Foundation
+ * Copyright (C) 2021 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,6 @@
 #include <rmf_utils/optional.hpp>
 #include <rmf_traffic/Time.hpp>
 
-#include <rmf_task_msgs/msg/delivery.hpp>
-#include <rmf_task_msgs/msg/loop.hpp>
 #include <rmf_task_msgs/msg/task_profile.hpp>
 
 namespace py = pybind11;
@@ -41,47 +39,47 @@ using Duration = rmf_traffic::Duration;
 using TaskType = rmf_task_msgs::msg::TaskType;
 using Loop = rmf_task_msgs::msg::Loop;
 using Delivery = rmf_task_msgs::msg::Delivery;
+using Clean = rmf_task_msgs::msg::Clean;
 using TaskDescription = rmf_task_msgs::msg::TaskDescription;
 using TaskProfile = rmf_task_msgs::msg::TaskProfile;
 
+//==============================================================================
 Delivery make_delivery_msg(
-    std::string task_id,
     std::string pickup_place_name,
     std::string pickup_dispenser,
     std::string dropoff_place_name,
     std::string dropoff_ingestor)
 {
     Delivery request;
-    request.task_id = task_id;
-
     request.pickup_place_name = pickup_place_name;
     request.pickup_dispenser = pickup_dispenser;
-
     request.dropoff_place_name = dropoff_place_name;
     request.dropoff_ingestor = dropoff_ingestor;
-
     return request;
 }
 
 Loop make_loop_msg(
-    std::string task_id,
     std::string robot_type,
     uint32_t num_loops,
     std::string start_name,
     std::string finish_name)
 {
     Loop request;
-    request.task_id = task_id;
     request.robot_type = robot_type;
     request.num_loops = num_loops;
-
     request.start_name = start_name;
     request.finish_name = finish_name;
-
     return request;
 }
 
+Clean make_clean_msg(std::string start_waypoint)
+{
+    Clean request;
+    request.start_waypoint = start_waypoint;
+    return request;
+}
 
+//==============================================================================
 void bind_types(py::module &m)
 {
     auto m_type = m.def_submodule("type");
@@ -98,49 +96,41 @@ void bind_types(py::module &m)
 
     py::class_<Delivery>(m_type, "CPPDeliveryMsg")
         .def(py::init(&make_delivery_msg),
-             py::arg("task_id") = "",
              py::arg("pickup_place_name") = "",
              py::arg("pickup_dispenser") = "",
              py::arg("dropoff_place_name") = "",
              py::arg("dropoff_ingestor") = "")
         .def_property(
-            "task_id",
-            [&](Delivery &self) { return self.task_id; },
-            [&](Delivery &self,
-                std::string task_id) { self.task_id = task_id; })
-        .def_property(
             "pickup_place_name",
             [&](Delivery &self) { return self.pickup_place_name; },
             [&](Delivery &self,
-                std::string pickup_place_name) { self.pickup_place_name = pickup_place_name; })
+                std::string pickup_place_name){
+                    self.pickup_place_name = pickup_place_name; })
         .def_property(
             "pickup_dispenser",
             [&](Delivery &self) { return self.pickup_dispenser; },
             [&](Delivery &self,
-                std::string pickup_dispenser) { self.pickup_dispenser = pickup_dispenser; })
+                std::string pickup_dispenser){
+                    self.pickup_dispenser = pickup_dispenser; })
         .def_property(
             "dropoff_place_name",
             [&](Delivery &self) { return self.dropoff_place_name; },
             [&](Delivery &self,
-                std::string dropoff_place_name) { self.dropoff_place_name = dropoff_place_name; })
+                std::string dropoff_place_name){
+                    self.dropoff_place_name = dropoff_place_name; })
         .def_property(
             "dropoff_ingestor",
             [&](Delivery &self) { return self.dropoff_ingestor; },
             [&](Delivery &self,
-                std::string dropoff_ingestor) { self.dropoff_ingestor = dropoff_ingestor; });
+                std::string dropoff_ingestor){
+                    self.dropoff_ingestor = dropoff_ingestor; });
 
     py::class_<Loop>(m_type, "CPPLoopMsg")
         .def(py::init(&make_loop_msg),
-             py::arg("task_id") = "",
              py::arg("robot_type") = "",
              py::arg("num_loops") = "",
              py::arg("start_name") = "",
              py::arg("finish_name") = "")
-        .def_property(
-            "task_id",
-            [&](Loop &self) { return self.task_id; },
-            [&](Loop &self,
-                std::string task_id) { self.task_id = task_id; })
         .def_property(
             "robot_type",
             [&](Loop &self) { return self.robot_type; },
@@ -162,7 +152,16 @@ void bind_types(py::module &m)
             [&](Loop &self,
                 std::string finish_name) { self.finish_name = finish_name; });
 
-    // TODO: Support More task_types
+    py::class_<Clean>(m_type, "CPPCleanMsg")
+        .def(py::init(&make_clean_msg),
+            py::arg("start_waypoint") = "")
+        .def_property(
+            "start_waypoint",
+            [&](Clean &self) { return self.start_waypoint; },
+            [&](Clean &self,
+                std::string start_waypoint){
+                    self.start_waypoint = start_waypoint; });
+
     py::class_<TaskDescription>(m_type, "CPPTaskDescriptionMsg")
         .def(py::init<>())
         .def_property(
@@ -179,6 +178,13 @@ void bind_types(py::module &m)
                         self.task_type.type = TaskType::TYPE_LOOP;
                         self.loop = loop; },
             "Loop Task, this will ovewrite the previous type")
+        .def_property(
+            "clean",
+            [&](TaskDescription &self) { return self.clean; },
+            [&](TaskDescription &self, Clean clean) {
+                        self.task_type.type = TaskType::TYPE_CLEAN;
+                        self.clean = clean; },
+            "Clean Task, this will ovewrite the previous type")
         .def_property(
             "start_time_sec",
             [&](TaskDescription &self) { return self.start_time.sec; },

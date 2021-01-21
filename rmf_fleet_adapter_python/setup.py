@@ -1,3 +1,17 @@
+# Copyright 2021 Open Source Robotics Foundation, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import os
 import re
 import sys
@@ -78,7 +92,10 @@ setup(
     name=package_name,
     version=__version__,
     packages=['rmf_fleet_adapter_python'],
-    package_dir={'rmf_fleet_adapter_python':'scripts'},
+    package_dir={
+        'rmf_fleet_adapter_python':'scripts',
+        'rmf_fleet_adapter_python':'examples'
+    },
     author='methylDragon',
     author_email='methylDragon@gmail.com',
     url='',
@@ -92,9 +109,9 @@ setup(
         'test_adapter = rmf_fleet_adapter_python.test_adapter:main',
         'test_delivery = rmf_fleet_adapter_python.test_delivery:main',
         'test_loop = rmf_fleet_adapter_python.test_loop:main',
-        'schedule_blockade_nodes = examples.schedule_blockade_nodes:main',
-        'dispatcher_node = examples.dispatcher_node:main',
-        'traffic_light = examples.traffic_light:main'
+        'schedule_blockade_nodes = rmf_fleet_adapter_python.schedule_blockade_nodes:main',
+        'dispatcher_node = rmf_fleet_adapter_python.dispatcher_node:main',
+        'traffic_light = rmf_fleet_adapter_python.traffic_light:main'
     ]},
     license='Apache License, Version 2.0',
     install_requires=['setuptools'],

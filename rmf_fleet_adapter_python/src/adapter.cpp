@@ -156,7 +156,6 @@ PYBIND11_MODULE(rmf_adapter, m) {
         .def("set_recharge_threshold", 
              &agv::FleetUpdateHandle::set_recharge_threshold,
              py::arg("threshold"))
-        // NOTE: deprecated 
         .def("accept_delivery_requests",
              &agv::FleetUpdateHandle::accept_delivery_requests,
              "NOTE: deprecated, use accept_task_reqeusts() instead")
@@ -169,7 +168,11 @@ PYBIND11_MODULE(rmf_adapter, m) {
                  &agv::FleetUpdateHandle::default_maximum_delay, py::const_),
              [&](agv::FleetUpdateHandle& self){
                  return self.default_maximum_delay();
-             });
+             })
+        .def("fleet_state_publish_period",
+             &agv::FleetUpdateHandle::fleet_state_publish_period,
+             py::arg("value"),
+             "The default value is 1s");
 
     // EASY TRAFFIC LIGHT HANDLE ===============================================
     py::class_<agv::Waypoint>(m, "Waypoint")

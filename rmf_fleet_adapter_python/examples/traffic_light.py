@@ -169,7 +169,7 @@ def main():
         ("dummybot2", 6), 
         ("dummybot1", 3), 
         ("dummybot1", 4), 
-        ("dummybot1", 5)], "Sequence seems to be incorrect, pls check"
+        ("dummybot1", 5)], "Sequence of visited waypoints is incorrect."
 
     print("Done Traffic Light Tutorial!")
     rclpy.shutdown()

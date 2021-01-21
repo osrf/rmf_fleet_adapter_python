@@ -1,4 +1,4 @@
-# Copyright 2020 Open Source Robotics Foundation, Inc.
+# Copyright 2021 Open Source Robotics Foundation, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ def submit_task_thread(mod):
     state3 = mod.get_task_state("null_id")
     print(f" {id1}: {state1}   \n {id2}: {state2} \n null_id: {state3}")
 
-    assert state1 == Nodes.TaskState.Failed, "state should fail cuz no bid"
+    assert state1 == Nodes.TaskState.Failed, "Fail due to absence of a bid"
     assert state2 == Nodes.TaskState.Pending, "state should be pending"
     assert state3 == None, "state should be none"
     assert mod.cancel_task(id2), "failed to cancel task"
