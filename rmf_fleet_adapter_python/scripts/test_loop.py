@@ -111,12 +111,12 @@ def main():
                                         angular=traits.Limits(1.0, 0.45),
                                         profile=profile)
 
-    # Manages delivery or loop requests
-    adapter = adpt.MockAdapter("TestDeliveryAdapter")
+    # Manages loop requests
+    adapter = adpt.MockAdapter("TestLoopAdapter")
     fleet = adapter.add_fleet(fleet_name, robot_traits, test_graph)
 
     # Set up task request callback function
-    # this we assumes that we accepts only delivery task
+    # we will only accept Loop task here
     def task_request_cb(task_profile):
         from rmf_task_msgs.msg import TaskType	
         if(task_profile.description.task_type == TaskType.TYPE_LOOP):
