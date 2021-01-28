@@ -117,18 +117,19 @@ def main():
 
     # Set up task request callback function
     def task_request_cb(task):
-        assert task.task_id == test_name
-        from rmf_task_msgs.msg import TaskType
-        assert task.description.task_type == TaskType.TYPE_LOOP
+        # this we assumes that we accepts all incoming task 
         return True
 
     fleet.accept_task_requests(task_request_cb)
 
     # Set fleet battery profile
     battery_sys = battery.BatterySystem.make(24.0, 40.0, 8.8)
-    motion_sink = battery.SimpleMotionPowerSink(battery_sys, 70.0, 40.0, 0.22)
-    ambient_sink = battery.SimpleDevicePowerSink(battery_sys, 20.0)
-    tool_sink = battery.SimpleDevicePowerSink(battery_sys, 10.0)
+    mech_sys = battery.MechanicalSystem.make(70.0, 40.0, 0.22)
+    motion_sink = battery.SimpleMotionPowerSink(battery_sys, mech_sys)
+    ambient_power_sys = battery.PowerSystem.make(20.0)
+    ambient_sink = battery.SimpleDevicePowerSink(battery_sys, ambient_power_sys)
+    tool_power_sys = battery.PowerSystem.make(10.0)
+    tool_sink = battery.SimpleDevicePowerSink(battery_sys, tool_power_sys)
 
     fleet.set_recharge_threshold(0.2)
     b_success = fleet.set_task_planner_params(
