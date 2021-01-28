@@ -91,10 +91,9 @@ class CMakeBuild(build_ext):
 setup(
     name=package_name,
     version=__version__,
-    packages=['rmf_fleet_adapter_python'],
+    packages=[package_name],
     package_dir={
-        'rmf_fleet_adapter_python':'scripts',
-        'rmf_fleet_adapter_python':'examples'
+        package_name:'scripts'
     },
     author='methylDragon',
     author_email='methylDragon@gmail.com',
@@ -106,12 +105,12 @@ setup(
     cmdclass={'build_ext': CMakeBuild},
     zip_safe=False,
     entry_points={'console_scripts': [
-        'test_adapter = rmf_fleet_adapter_python.test_adapter:main',
-        'test_delivery = rmf_fleet_adapter_python.test_delivery:main',
-        'test_loop = rmf_fleet_adapter_python.test_loop:main',
-        'schedule_blockade_nodes = rmf_fleet_adapter_python.schedule_blockade_nodes:main',
-        'dispatcher_node = rmf_fleet_adapter_python.dispatcher_node:main',
-        'traffic_light = rmf_fleet_adapter_python.traffic_light:main'
+        f'test_adapter = {package_name}.test_adapter:main',
+        f'test_delivery = {package_name}.test_delivery:main',
+        f'test_loop = {package_name}.test_loop:main',
+        f'schedule_blockade_nodes = {package_name}.schedule_blockade_nodes:main',
+        f'dispatcher_node = {package_name}.dispatcher_node:main',
+        f'traffic_light = {package_name}.traffic_light:main'
     ]},
     license='Apache License, Version 2.0',
     install_requires=['setuptools'],

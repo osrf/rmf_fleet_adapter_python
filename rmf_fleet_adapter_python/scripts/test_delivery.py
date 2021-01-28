@@ -117,9 +117,13 @@ def main():
     fleet = adapter.add_fleet(fleet_name, robot_traits, test_graph)
 
     # Set up task request callback function
+    # this we assumes that we accepts only delivery task
     def task_request_cb(task_profile):
-        # this we assumes that we accepts all incoming task
-        return True
+        from rmf_task_msgs.msg import TaskType	
+        if(task_profile.description.task_type == TaskType.TYPE_DELIVERY):
+            return True
+        else:
+            return False
 
     fleet.accept_task_requests(task_request_cb)
 
