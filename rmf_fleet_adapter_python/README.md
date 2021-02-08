@@ -167,14 +167,6 @@ adpt.test_shared_ptr(command_handler,
 # With default args!
 adpt.test_shared_ptr(command_handler,
                      docking_finish_callback=lambda: print("wow"))
-
-# adpt.test_shared_ptr binds:
-# [](std::shared_ptr<rmf_mock_adapter::RobotCommandHandle> handle,
-#    std::string dock_name = "DUMMY_DOCK_NAME",
-#    std::function<void()> docking_finished_callback = [&](){})
-# {
-#   handle->dock(dock_name, docking_finished_callback);
-# }
 ```
 
 
@@ -300,11 +292,13 @@ However, if you have already done that, relevant points are to:
    - And instantiating its traits: `traits.VehicleTraits()`
 9. Create an adapter: `adpt.Adapter()` or `adpt.MockAdapter()`
 10. Attach a new fleet: `add_fleet()`
-11. Create a list of Plan Starts: `[plan.Start()]`
+11. Define a callback function for task acceptance: `accept_task_requests()`
+12. Set battery related parameters: `set_recharge_threshold()` and `set_task_planner_params()`
+13. Create a list of Plan Starts: `[plan.Start()]`
     - You will need to pass in a C++ starting time object, which you can obtain using the `now()` method from your instantiated `Adapter/MockAdapter`
-12. And add your robots to your fleet: `add_robot()`
-13. Then simply request your deliveries!: `request_delivery()`
-14. Then spin your `rclpy` nodes if you have any!: `spin()`, `spin_once()`
+14. And add your robots to your fleet: `add_robot()`
+15. Then simply request your deliveries!: `request_delivery()`
+16. Then spin your `rclpy` nodes if you have any!: `spin()`, `spin_once()`
 
 T​hen you're done! :tada:
 
