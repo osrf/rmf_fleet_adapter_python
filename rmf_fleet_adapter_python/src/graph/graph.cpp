@@ -168,6 +168,10 @@ void bind_graph(py::module &m) {
       .def("get_lane", py::overload_cast<std::size_t>(&Graph::get_lane))
       .def("get_lane", py::overload_cast<std::size_t>(
           &Graph::get_lane, py::const_))
+      .def("lane_from", py::overload_cast<std::size_t, std::size_t>(
+        &Graph::lane_from))
+      .def("lane_from", py::overload_cast<std::size_t, std::size_t>(
+        &Graph::lane_from, py::const_))
       .def_property_readonly("num_lanes", &Graph::num_lanes);
 
   // PARSE GRAPH ==============================================================

@@ -33,6 +33,7 @@ void bind_plan(py::module &);
 void bind_tests(py::module &);
 void bind_nodes(py::module &);
 void bind_battery(py::module &);
+void bind_schedule(py::module &);
 
 PYBIND11_MODULE(rmf_adapter, m) {
     bind_types(m);
@@ -43,6 +44,7 @@ PYBIND11_MODULE(rmf_adapter, m) {
     bind_tests(m);
     bind_nodes(m);
     bind_battery(m);
+    bind_schedule(m);
 
     // ROBOTCOMMAND HANDLE =====================================================
     // Abstract class
@@ -108,7 +110,12 @@ PYBIND11_MODULE(rmf_adapter, m) {
                  &agv::RobotUpdateHandle::maximum_delay, py::const_),
              [&](agv::RobotUpdateHandle& self){
                  return self.maximum_delay();
-             });
+             })
+        .def("get_unstable_participant",
+             [&](agv::RobotUpdateHandle& self){
+                return self.unstable().get_participant();
+             },
+             "Experimental API to access the schedule participant");
 
     // FLEETUPDATE HANDLE ======================================================
     py::class_<agv::FleetUpdateHandle,

@@ -22,7 +22,7 @@ colcon build --packages-select rmf_fleet_adapter_python
 Integration test script for rmf loop and delivery task:
 
 ```shell
-ros2 run rmf_adapter_python test_adapter
+ros2 run rmf_fleet_adapter_python test_adapter
 ```
 
 You may then probe the effects on the ROS2 graph by subscribing to the following topics with `ros2 topic echo <TOPIC_NAME>`:

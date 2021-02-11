@@ -1,0 +1,152 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module rmf_adapter.schedule</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="rmf_adapter.html"><font color="#ffffff">rmf_adapter</font></a>.schedule</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br>(built-in)</font></td></tr></table>
+    <p></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial">pybind11_builtins.pybind11_object(<a href="builtins.html#object">builtins.object</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="rmf_adapter.schedule.html#Item">Item</a>
+</font></dt><dt><font face="helvetica, arial"><a href="rmf_adapter.schedule.html#Participant">Participant</a>
+</font></dt><dt><font face="helvetica, arial"><a href="rmf_adapter.schedule.html#Route">Route</a>
+</font></dt><dt><font face="helvetica, arial"><a href="rmf_adapter.schedule.html#Trajectory">Trajectory</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Item">class <strong>Item</strong></a>(pybind11_builtins.pybind11_object)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="rmf_adapter.schedule.html#Item">Item</a></dd>
+<dd>pybind11_builtins.pybind11_object</dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="Item-__init__"><strong>__init__</strong></a>(self, /, *args, **kwargs)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>id</strong></dt>
+</dl>
+<dl><dt><strong>route</strong></dt>
+</dl>
+<hr>
+Static methods inherited from pybind11_builtins.pybind11_object:<br>
+<dl><dt><a name="Item-__new__"><strong>__new__</strong></a>(*args, **kwargs)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_type</font></font></dt><dd><tt>Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;object.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Participant">class <strong>Participant</strong></a>(pybind11_builtins.pybind11_object)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="rmf_adapter.schedule.html#Participant">Participant</a></dd>
+<dd>pybind11_builtins.pybind11_object</dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="Participant-__init__"><strong>__init__</strong></a>(self, /, *args, **kwargs)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<dl><dt><a name="Participant-clear"><strong>clear</strong></a>(...)</dt><dd><tt><a href="#Participant-clear">clear</a>(self:&nbsp;rmf_adapter.schedule.<a href="#Participant">Participant</a>)&nbsp;-&gt;&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="Participant-erase"><strong>erase</strong></a>(...)</dt><dd><tt><a href="#Participant-erase">erase</a>(self:&nbsp;rmf_adapter.schedule.<a href="#Participant">Participant</a>,&nbsp;routes:&nbsp;Set[int])&nbsp;-&gt;&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="Participant-get_itinerary"><strong>get_itinerary</strong></a>(...)</dt><dd><tt><a href="#Participant-get_itinerary">get_itinerary</a>(self:&nbsp;rmf_adapter.schedule.<a href="#Participant">Participant</a>)&nbsp;-&gt;&nbsp;List[rmf_traffic::schedule::Writer::<a href="#Item">Item</a>]</tt></dd></dl>
+
+<dl><dt><a name="Participant-set_itinerary"><strong>set_itinerary</strong></a>(...)</dt><dd><tt><a href="#Participant-set_itinerary">set_itinerary</a>(self:&nbsp;rmf_adapter.schedule.<a href="#Participant">Participant</a>,&nbsp;arg0:&nbsp;List[rmf_traffic::<a href="#Route">Route</a>])&nbsp;-&gt;&nbsp;int</tt></dd></dl>
+
+<hr>
+Readonly properties defined here:<br>
+<dl><dt><strong>id</strong></dt>
+</dl>
+<dl><dt><strong>last_route_id</strong></dt>
+</dl>
+<dl><dt><strong>version</strong></dt>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>delay</strong></dt>
+</dl>
+<hr>
+Static methods inherited from pybind11_builtins.pybind11_object:<br>
+<dl><dt><a name="Participant-__new__"><strong>__new__</strong></a>(*args, **kwargs)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_type</font></font></dt><dd><tt>Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;object.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Route">class <strong>Route</strong></a>(pybind11_builtins.pybind11_object)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="rmf_adapter.schedule.html#Route">Route</a></dd>
+<dd>pybind11_builtins.pybind11_object</dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="Route-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt><a href="#Route-__init__">__init__</a>(self:&nbsp;rmf_adapter.schedule.<a href="#Route">Route</a>,&nbsp;map:&nbsp;str,&nbsp;trajectory:&nbsp;rmf_traffic::<a href="#Trajectory">Trajectory</a>)&nbsp;-&gt;&nbsp;None</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>map</strong></dt>
+</dl>
+<dl><dt><strong>trajectory</strong></dt>
+</dl>
+<hr>
+Static methods inherited from pybind11_builtins.pybind11_object:<br>
+<dl><dt><a name="Route-__new__"><strong>__new__</strong></a>(*args, **kwargs)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_type</font></font></dt><dd><tt>Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;object.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Trajectory">class <strong>Trajectory</strong></a>(pybind11_builtins.pybind11_object)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="rmf_adapter.schedule.html#Trajectory">Trajectory</a></dd>
+<dd>pybind11_builtins.pybind11_object</dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="Trajectory-__init__"><strong>__init__</strong></a>(self, /, *args, **kwargs)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<hr>
+Static methods inherited from pybind11_builtins.pybind11_object:<br>
+<dl><dt><a name="Trajectory-__new__"><strong>__new__</strong></a>(*args, **kwargs)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_type</font></font></dt><dd><tt>Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;object.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-make_trajectory"><strong>make_trajectory</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> method of builtins.PyCapsule instance</font></font></dt><dd><tt><a href="#-make_trajectory">make_trajectory</a>(traits:&nbsp;rmf_adapter.vehicletraits.VehicleTraits,&nbsp;start_time:&nbsp;datetime.datetime,&nbsp;input_positions:&nbsp;List[numpy.ndarray[numpy.float64[3,&nbsp;1]]])&nbsp;-&gt;&nbsp;rmf_traffic::<a href="#Trajectory">Trajectory</a></tt></dd></dl>
+</td></tr></table>
+</body></html>
