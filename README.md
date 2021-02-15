@@ -2,7 +2,7 @@
 Python bindings for the fleet adapters for [rmf_core](https://github.com/osrf/rmf_core)
 ( Specifically [rmf_fleet_adapter](https://github.com/osrf/rmf_core/tree/develop/rmf_fleet_adapter) )
 
-For API Docs, see [the documentation](https://osrf.github.io/rmf_fleet_adapter_python).
+For API Docs, see [the documentation](https://osrf.github.io/rmf_fleet_adapter_python/).
 
 ## Pre-Requisites
 
