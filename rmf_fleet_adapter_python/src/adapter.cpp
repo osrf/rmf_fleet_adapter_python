@@ -101,6 +101,10 @@ PYBIND11_MODULE(rmf_adapter, m) {
              py::arg("min_lane_length") = 1e-8,
              py::call_guard<py::scoped_ostream_redirect,
                             py::scoped_estream_redirect>())
+        .def("set_charger_waypoint", &agv::RobotUpdateHandle::set_charger_waypoint,
+             py::arg("charger_wp"),
+             py::call_guard<py::scoped_ostream_redirect,
+                            py::scoped_estream_redirect>())
         .def("update_battery_soc", &agv::RobotUpdateHandle::update_battery_soc,
              py::arg("battery_soc"),
              py::call_guard<py::scoped_ostream_redirect,
