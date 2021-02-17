@@ -233,7 +233,12 @@ PYBIND11_MODULE(rmf_adapter, m) {
                 &agv::EasyTrafficLight::waiting_after),
             py::arg("checkpoint"),
             py::arg("location"))
-        .def("last_reached", &agv::EasyTrafficLight::last_reached);
+        .def("last_reached", &agv::EasyTrafficLight::last_reached)
+        .def("update_idle_location",
+            py::overload_cast<std::string, Eigen::Vector3d>(
+                &agv::EasyTrafficLight::update_idle_location),
+            py::arg("map_name"),
+            py::arg("position"));
 
     // prefix traffic light
     auto m_easy_traffic_light = m.def_submodule("easy_traffic_light");
