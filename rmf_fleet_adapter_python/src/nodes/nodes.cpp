@@ -62,10 +62,10 @@ void bind_nodes(py::module &m)
                   // py::arg("dispatcher_node_name"), TODO Remove in next version
                   py::call_guard<py::scoped_ostream_redirect,
                                  py::scoped_estream_redirect>())
-      .def("submit_task",
-           py::overload_cast<const Dispatcher::TaskDescription&>(
-            &Dispatcher::submit_task),
-           py::arg("task_description"))
+      // .def("submit_task",
+      //      py::overload_cast<const Dispatcher::TaskDescription&>(
+      //       &Dispatcher::submit_task),
+      //      py::arg("task_description"))
       .def("cancel_task", &Dispatcher::cancel_task,
            py::arg("task_id"))
       .def("spin", &Dispatcher::spin,

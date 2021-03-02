@@ -39,7 +39,7 @@ void bind_schedule(py::module &m)
       .def("erase", &schedule::Participant::erase, py::arg("routes"))
       .def("clear", &schedule::Participant::clear)
       .def("get_itinerary", &schedule::Participant::itinerary)
-      .def("set_itinerary", &schedule::Participant::set);
+      .def("set_itinerary", &schedule::Participant::set, py::arg("itinerary"));
 
   /// Writer::Item =============================================================
   py::class_<schedule::Writer::Item>(m_schedule, "Item")
