@@ -115,7 +115,7 @@ PYBIND11_MODULE(rmf_adapter, m) {
              [&](agv::RobotUpdateHandle& self){
                  return self.maximum_delay();
              })
-        .def("get_infinite_delay",
+        .def("set_infinite_delay",
              [&](agv::RobotUpdateHandle& self){
                 self.maximum_delay(rmf_utils::nullopt);
              })
