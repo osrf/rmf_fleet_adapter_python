@@ -169,9 +169,9 @@ void bind_graph(py::module &m) {
       .def("get_lane", py::overload_cast<std::size_t>(
           &Graph::get_lane, py::const_))
       .def("lane_from", py::overload_cast<std::size_t, std::size_t>(
-        &Graph::lane_from))
+        &Graph::lane_from), py::return_value_policy::reference)
       .def("lane_from", py::overload_cast<std::size_t, std::size_t>(
-        &Graph::lane_from, py::const_))
+        &Graph::lane_from, py::const_), py::return_value_policy::reference)
       .def_property_readonly("num_lanes", &Graph::num_lanes)
       .def("lanes_from_waypoint",
           py::overload_cast<std::size_t>(&Graph::lanes_from, py::const_),
